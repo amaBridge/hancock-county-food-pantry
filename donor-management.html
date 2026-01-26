@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Donor Management</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+    .navbar {
+      width: 100%;
+      background: linear-gradient(90deg, #2c3e50 60%, #7095bd 100%);
+      padding: 0.15em 1.2em 0.15em 1.2em;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+      border-bottom: 2px solid #9dae55;
+      position: relative;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      margin-right: 1em;
+    }
+    .logo {
+      width: auto;
+      height: auto;
+      max-height: 44px;
+      object-fit: contain;
+      margin: 0;
+      padding: 0;
+      display: block;
+    }
+    .nav-links {
+      display: flex;
+      gap: 0.5em;
+      align-items: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1.08em;
+      padding: 6px 18px;
+      border-radius: 4px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .nav-links a:hover {
+      background: #9dae55;
+      color: #2c3e50;
+      box-shadow: 0 2px 8px rgba(44, 62, 80, 0.12);
+    }
+    .nav-divider {
+      display: inline-block;
+      width: 1px;
+      height: 22px;
+      background: #9dae55;
+      margin: 0 0.5em;
+      vertical-align: middle;
+    }
+    .container { max-width: 600px; margin: 12px auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .header { background-color: #fff; padding: 12px; display: flex; align-items: center; gap: 12px; }
+    .logo { width: 16%; height: auto; max-height: 48px; object-fit: contain; }
+    .header-content { text-align: left; }
+    .header-content h1 { font-size: 28px; color: #9dae55; margin-bottom: 10px; }
+    .header-content p { color: #5a7a92; font-size: 14px; }
+    .form-section { background-color: #7095bd; padding: 12px; border-bottom: 1px solid #e0e0e0; margin: 0 10px 10px 10px; border-radius: 6px; }
+    .form-section h2 { font-size: 16px; color: white; margin-bottom: 10px; font-weight: bold; }
+    .input-group { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 10px; }
+    .input-field { display: flex; flex-direction: column; }
+    .input-field label { font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
+    .input-field input { padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    .add-donor { display: flex; gap: 0.5em; margin: 10px 10px 0 10px; }
+    .add-donor input { flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    .add-donor button { padding: 6px 14px; background-color: #9dae55; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; }
+    .add-donor button:hover { background-color: #7fa642; }
+    .donor-list { background-color: #7095bd; padding: 12px; border-radius: 6px; margin: 10px; }
+    .donor-list h2 { font-size: 16px; color: white; margin-bottom: 10px; font-weight: bold; }
+    .donor-list ul { list-style: none; padding: 0; }
+    .donor-list li { display: flex; align-items: center; justify-content: space-between; padding: 0.5em 0; border-bottom: 1px solid #e0e0e0; }
+    .donor-list input[type="text"] { width: 60%; padding: 0.2em; background: transparent; border: none; font-size: 1em; color: #fff; }
+    .donor-list button { margin-left: 0.5em; background-color: #5a7a92; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
+    .donor-list button:hover { background-color: #9dae55; color: #fff; }
+    .form-section button {
+      background-color: #5a7a92;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .form-section button:hover {
+      background-color: #9dae55;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- =============================
+       TOP NAVIGATION PANE
+  ============================== -->
+    <nav class="navbar">
+        <a class="nav-logo" href="index.html">
+            <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <span class="nav-divider"></span>
+            <a href="donor-management.html">Donor Management</a>
+            <span class="nav-divider"></span>
+            <a href="donations-management.html">Donations Management</a>
+        </div>
+    </nav>
+  <div class="container">
+    <div class="header">
+      <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo">
+      <div class="header-content">
+        <h1>Donor Management</h1>
+        <p>For Hancock County Food Pantry</p>
+      </div>
+    </div>
+    <div class="form-section">
+      <div class="add-donor">
+        <input type="text" id="newDonorName" placeholder="Add new donor...">
+        <button id="addDonorBtn">Add</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center;">
+        <span style="color:white;font-weight:bold;">Sort:</span>
+        <button id="sortDateDesc" title="Newest First">Date &#8595;</button>
+        <button id="sortDateAsc" title="Oldest First">Date &#8593;</button>
+        <button id="sortAlphaAsc" title="A to Z">A-Z</button>
+        <button id="sortAlphaDesc" title="Z to A">Z-A</button>
+      </div>
+    </div>
+    <div class="donor-list">
+      <h2>Current Donors</h2>
+      <ul id="donorList">
+        <!-- Donor items will be populated here -->
+      </ul>
+    </div>
+  </div>
+    <script src="donor-management.js"></script>

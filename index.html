@@ -1,0 +1,512 @@
+<!-- =============================
+                 TOP NAVIGATION PANE
+        ============================== -->
+        <nav class="navbar">
+            <a class="nav-logo" href="index.html">
+                <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
+            </a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <span class="nav-divider"></span>
+                <a href="donor-management.html">Donor Management</a>
+                <span class="nav-divider"></span>
+                <a href="donations-management.html">Donations Management</a>
+            </div>
+        </nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation Entry Form</title>
+    <style>
+        /* Navigation Bar Styles */
+        .navbar {
+            width: 100%;
+            background: linear-gradient(90deg, #2c3e50 60%, #7095bd 100%);
+            padding: 0.15em 1.2em 0.15em 1.2em;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+            border-bottom: 2px solid #9dae55;
+            position: relative;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            margin-right: 1em;
+        }
+        .nav-links {
+            display: flex;
+            gap: 0.5em;
+            align-items: center;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-divider {
+            display: inline-block;
+            width: 1px;
+            height: 22px;
+            background: #9dae55;
+            margin: 0 0.5em;
+            vertical-align: middle;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.08em;
+            padding: 6px 18px;
+            border-radius: 4px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .nav-links a:hover {
+            background: #9dae55;
+            color: #2c3e50;
+            box-shadow: 0 2px 8px rgba(44, 62, 80, 0.12);
+        }
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 12px auto;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+          /* =============================
+              HEADER SECTION
+          ============================== */
+        .header {
+            background-color: #FFFFFF;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: auto;
+            height: auto;
+            max-height: 44px;
+            object-fit: contain;
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+        
+        .header-content {
+            text-align: left;
+        }
+        
+        .header-content h1 {
+            font-size: 28px;
+            color: #9dae55;
+            margin-bottom: 10px;
+        }
+        
+        .header-content p {
+            color: #5a7a92;
+            font-size: 14px;
+        }
+        
+          /* =============================
+              COMPANY SELECTION SECTION
+          ============================== */
+                  /* =============================
+                      ADD NEW DONOR SECTION
+                  ============================== */
+                  /* Uses .form-section, .input-group, .input-field, .input-field label, .input-field input */
+        .form-section {
+            background-color: #7095bd;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            margin: 0 10px 10px 10px;
+            border-radius: 6px;
+        }
+        
+        .form-section h2 {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .input-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-field label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .input-field input,
+        .input-field select {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+          /* =============================
+              CATEGORY SELECTION SECTION
+          ============================== */
+        .category-section {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #7095bd;
+            margin: 10px;
+            border-radius: 6px;
+        }
+        
+        .category-section h2 {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            flex: 1;
+            min-width: 70px;
+            padding: 6px 10px;
+            border: 2px solid #9dae55;
+            background-color: white;
+            color: black;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .category-btn:hover {
+            background-color: #f0f3e6;
+        }
+        
+        .category-btn.active {
+            background-color: #9dae55;
+            color: white;
+        }
+        
+          /* =============================
+              WEIGHT & TEMPERATURE SECTION
+          ============================== */
+        .usage-section {
+            background-color: #7095bd;
+            padding: 10px;
+            color: white;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 12px;
+            margin: 10px;
+            border-radius: 6px;
+        }
+        
+        .weight-container {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .usage-item {
+            text-align: right;
+            flex: 1;
+        }
+        
+        .usage-value {
+            font-size: 28px;
+            font-weight: bold;
+            background-color: #5a7a92;
+            padding: 10px 10px;
+            border-radius: 4px;
+            margin-bottom: 3px;
+            font-family: 'Courier New', monospace;
+            text-align: right;
+            align-self: center;
+            width: 100%;
+            max-width: 220px;
+            transition: max-width 0.3s, flex 0.3s;
+        }
+        
+        .usage-value.expand {
+            max-width: 100%;
+            flex: 1 1 auto;
+        }
+        
+        .usage-label {
+            font-size: 12px;
+            text-align: right;
+            margin: 2px;
+        }
+        
+        .temperature-input {
+            display: none;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            background-color: white;
+            color: #333;
+            min-width: 80px;
+            align-self: center;
+            height: 56px;
+            flex: 0.9;
+        }
+        
+        .temperature-input.show {
+            display: block;
+        }
+        
+        .log-weight-btn {
+            padding: 6px 14px;
+            background-color: #9dae55;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 56px;
+            align-self: center;
+        }
+        
+        .log-weight-btn:hover {
+            background-color: #7fa642;
+        }
+        
+          /* =============================
+              ACTION BUTTONS SECTION
+          ============================== */
+        .buttons-section {
+            background-color: #7095bd;
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin: 10px 10px 0 10px;
+            border-radius: 6px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .btn-submit {
+            background-color: #9dae55;
+        }
+        
+        .btn-submit:hover {
+            background-color: #7fa642;
+        }
+        
+        .btn-reset {
+            background-color: #9dae55;
+        }
+        
+        .btn-reset:hover {
+            background-color: #7fa642;
+        }
+        
+          /* =============================
+              OUTPUT SECTION
+          ============================== */
+        .output-section {
+            background-color: #e0e0e0;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin: 10px;
+            border-radius: 6px;
+        }
+        
+        .output-section h2 {
+            grid-column: 1 / -1;
+            font-size: 16px;
+            color: #7095bd;
+            font-weight: bold;
+        }
+        
+        .output-item {
+            background-color: #5a7a92;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            color: #00E676;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .output-value {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
+        .output-label {
+            font-size: 10px;
+            color: #d4e4f7;
+        }
+        
+          /* =============================
+              SUBMIT DONATION SECTION
+          ============================== */
+        .submit-section {
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            background-color: white;
+            margin: 0 10px 10px 10px;
+            border-radius: 6px;
+        }
+        
+        .submit-donation-btn {
+            padding: 12px 30px;
+            background-color: #9dae55;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .submit-donation-btn:hover {
+            background-color: #7fa642;
+        }
+    </style>
+</head>
+<body>
+    <!-- script moved to script.js -->
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo">
+            <div class="header-content">
+                <h1>Donation Entry Form</h1>
+                <p>For Hancock County Food Pantry</p>
+            </div>
+        </div>
+        
+        <!-- Donor Information Section -->
+        <div class="form-section">
+            <h2>Select Company</h2>
+            <div class="input-group">
+                <div class="input-field">
+                    <select id="companySelect">
+                        <option value="">-- Select a Company --</option>
+                    </select>
+                    <!-- script moved to script.js -->
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Category Selection Section -->
+        <div class="category-section">
+            <h2>Select Category</h2>
+            <div class="button-group">
+                <button class="category-btn" onclick="selectCategory(this)">Produce</button>
+                <button class="category-btn" onclick="selectCategory(this)">Frozen Meats</button>
+                <button class="category-btn" onclick="selectCategory(this)">Misc Frozen</button>
+                <button class="category-btn" onclick="selectCategory(this)">Bakery</button>
+                <button class="category-btn" onclick="selectCategory(this)">Dry</button>
+            </div>
+        </div>
+        
+        <!-- Current Usage Section -->
+        <div class="usage-section">
+            <div class="weight-container">
+                <input type="number" id="temperatureInput" class="temperature-input" placeholder="Enter Temperature (°F)">
+                <div class="usage-item">
+                    <div class="usage-label" id="categoryLabel">Select Category</div>
+                    <input type="number" class="usage-value" value="0.00" min="0" step="0.01">
+                    <div class="usage-label">pounds</div>
+                </div>
+                <button class="log-weight-btn">Log Weight</button>
+            </div>
+        </div>
+        
+        <!-- Buttons Section -->
+        <div class="buttons-section">
+            <button class="btn btn-submit">Undo Last Measurment</button>
+            <button class="btn btn-reset">Clear Category</button>
+            <button class="btn btn-submit">Restart Donation</button>
+        </div>
+        
+        <!-- Output Section -->
+        <div class="output-section">
+            <h2>Totals</h2>
+            <div class="output-item">
+                <div class="output-value">0.00</div>
+                <div class="output-label">Produce</div>
+            </div>
+            <div class="output-item">
+                <div class="output-value">0.00</div>
+                <div class="output-label">Frozen Meats</div>
+            </div>
+            <div class="output-item">
+                <div class="output-value">0.00</div>
+                <div class="output-label">Misc Frozen</div>
+            </div>
+            <div class="output-item">
+                <div class="output-value">0.00</div>
+                <div class="output-label">Bakery</div>
+            </div>
+            <div class="output-item">
+                <div class="output-value">0.00</div>
+                <div class="output-label">Dry</div>
+            </div>
+        </div>
+        
+        <!-- Submit Donation Section -->
+        <div class="submit-section">
+            <button class="submit-donation-btn">Submit Donation</button>
+        </div>
+    </div>
+</body>
+<script src="index.js"></script>
+</html>
