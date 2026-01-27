@@ -22,9 +22,9 @@
     <style>
         /* Navigation Bar Styles */
         .navbar {
-            width: 100%;
+            height: 60px; /* Set a fixed height */
+            padding: 0 1.2em; /* Adjust padding to maintain alignment */
             background: linear-gradient(90deg, #2c3e50 60%, #7095bd 100%);
-            padding: 0.15em 1.2em 0.15em 1.2em;
             display: flex;
             align-items: center;
             box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
@@ -417,6 +417,12 @@
         .submit-donation-btn:hover {
             background-color: #7fa642;
         }
+        
+        @media (max-width: 768px) {
+          .logo {
+            display: none;
+          }
+        }
     </style>
 </head>
 <body>
@@ -508,5 +514,6 @@
         </div>
     </div>
 </body>
-<script src="index.js"></script>
+<script src="donor-management.js"></script>
+<script src="donations-management.js"></script>
 </html>

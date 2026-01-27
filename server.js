@@ -28,17 +28,33 @@ app.get('/', (req, res) => {
 
 // Route to get all donations
 app.get('/donations', (req, res) => {
-    const data = readData();
-    res.json(data.donations);
+    try {
+        const data = readData();
+        res.json(data.donations || []);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error reading data' });
+    }
 });
 
 // Route to add a new donation
 app.post('/donations', (req, res) => {
-    const newDonation = req.body;
-    const data = readData();
-    data.donations.push(newDonation);
-    writeData(data);
-    res.status(201).json({ message: 'Donation added successfully!' });
+    const { donor_name, amount } = req.body;
+    try {
+        const data = readData();
+        const newDonation = {
+            id: data.donations.length + 1,
+            donor_name,
+            amount,
+            date: new Date().toISOString()
+        };
+        data.donations.push(newDonation);
+        writeData(data);
+        res.status(201).json({ message: 'Donation added successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Error writing data' });
+    }
 });
 
 app.listen(PORT, () => {

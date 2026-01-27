@@ -8,9 +8,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
                 .navbar {
-                    width: 100%;
+                    height: 60px; /* Set a fixed height */
+                    padding: 0 1.2em; /* Adjust padding to maintain alignment */
                     background: linear-gradient(90deg, #2c3e50 60%, #7095bd 100%);
-                    padding: 0.15em 1.2em 0.15em 1.2em;
                     display: flex;
                     align-items: center;
                     box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
@@ -79,7 +79,21 @@
         td { font-size: 13px; }
         .delete-btn { padding: 6px 14px; background-color: #9dae55; color: white; border: none; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; }
         .delete-btn:hover { background-color: #7fa642; }
+
+        @media (max-width: 768px) {
+          .logo {
+            display: none;
+          }
+          .table-section {
+            width: auto; /* Adjust to fit the table's width */
+            overflow-x: auto; /* Enable horizontal scrolling if necessary */
+          }
+          table {
+            min-width: 600px; /* Ensure the table has a minimum width */
+          }
+        }
     </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
         <nav class="navbar">
@@ -91,12 +105,11 @@
                         <span class="nav-divider"></span>
                         <a href="donor-management.html">Donor Management</a>
                         <span class="nav-divider"></span>
-                        <a href="donations-management.html" class="active">Donations Management</a>
+                        <a href="donations-management.html">Donations Management</a>
                 </div>
         </nav>
     <div class="container">
         <div class="header">
-            <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo">
             <div class="header-content">
                 <h1>Donations Management</h1>
                 <p>For Hancock County Food Pantry</p>
