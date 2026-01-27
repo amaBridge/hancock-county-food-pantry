@@ -1,17 +1,49 @@
+// ============================================================
 // donations-management.js
-// Handles displaying and deleting donations
+// ============================================================
+// Purpose
+// - Renders the donation history table on donations-management.html.
+// - Allows sorting by date (toggle ascending/descending).
+// - Allows deletion of a donation entry.
+//
+// Data source
+// - localStorage('donationsList'): array of donation objects created on Home.
+// ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
+    // DOM anchors (only exist on donations-management.html)
     const tableBody = document.querySelector('#donationsTable tbody');
     const orderToggleBtn = document.getElementById('orderToggleBtn');
+
+    // Controls the sort order in the UI
     let isDescending = true;
 
-    function loadDonations() {
-        tableBody.innerHTML = '';
-        let donations = JSON.parse(localStorage.getItem('donationsList') || '[]');
-        // Sort by dateTime
+    function toFixed2(value) {
+        const num = Number(value);
+        return Number.isFinite(num) ? num.toFixed(2) : '0.00';
+    }
+
+    function openReceiptPage(donation, { autoPrint = true } = {}) {
+        const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        try {
+            localStorage.setItem(`receipt:${id}`, JSON.stringify(donation));
+        } catch {
+            alert('Unable to prepare receipt data (storage unavailable).');
+            return;
+        }
+
+        const url = `receipt.html?id=${encodeURIComponent(id)}${autoPrint ? '&autoprint=1' : ''}`;
+        const win = window.open(url, '_blank');
+        if (!win) {
+            alert('Popup blocked. Please allow popups to print receipts.');
+            return;
+        }
+        try { win.focus(); } catch { }
+    }
+
+    function getSortedDonations() {
+        const donations = JSON.parse(localStorage.getItem('donationsList') || '[]');
         donations.sort((a, b) => {
-            // Try to parse dateTime as Date
             let dateA = new Date(a.dateTime);
             let dateB = new Date(b.dateTime);
             if (isDescending) {
@@ -20,18 +52,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 return dateA - dateB;
             }
         });
+        return donations;
+    }
+
+    function loadDonations() {
+        // Full re-render of the table from storage
+        tableBody.innerHTML = '';
+        const donations = getSortedDonations();
         donations.forEach((donation, idx) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${donation.dateTime}</td>
                 <td>${donation.companyName}</td>
-                <td>${donation.Produce.toFixed(2)}</td>
-                <td>${donation['Frozen Meats'].toFixed(2)}</td>
+                <td>${toFixed2(donation.Produce)}</td>
+                <td>${toFixed2(donation['Frozen Meats'])}</td>
                 <td>${donation.temperature ? donation.temperature : ''}</td>
-                <td>${donation['Misc Frozen'].toFixed(2)}</td>
-                <td>${donation.Bakery.toFixed(2)}</td>
-                <td>${donation.Dry.toFixed(2)}</td>
-                <td><button data-idx="${idx}" class="delete-btn">Delete</button></td>
+                <td>${toFixed2(donation['Misc Frozen'])}</td>
+                <td>${toFixed2(donation.Bakery)}</td>
+                <td>${toFixed2(donation.Dry)}</td>
+                <td>
+                    <div class="actions">
+                        <button data-idx="${idx}" class="receipt-btn">Receipt</button>
+                        <button data-idx="${idx}" class="delete-btn">Delete</button>
+                    </div>
+                </td>
             `;
             tableBody.appendChild(tr);
         });
@@ -39,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (orderToggleBtn) {
         orderToggleBtn.addEventListener('click', function() {
+            // Toggle sort direction and re-render
             isDescending = !isDescending;
             orderToggleBtn.textContent = 'Order: ' + (isDescending ? 'Descending' : 'Ascending');
             loadDonations();
@@ -46,24 +91,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     tableBody.addEventListener('click', function(e) {
-        if (e.target.classList.contains('delete-btn')) {
-            const idx = parseInt(e.target.getAttribute('data-idx'));
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        if (target.classList.contains('receipt-btn')) {
+            const idx = parseInt(target.getAttribute('data-idx'));
+            const donations = getSortedDonations();
+            const donation = donations[idx];
+            if (!donation) return;
+            openReceiptPage(donation, { autoPrint: true });
+            return;
+        }
+
+        if (target.classList.contains('delete-btn')) {
+            const idx = parseInt(target.getAttribute('data-idx'));
             if (!confirm('Are you sure you want to delete this donation?')) return;
-            let donations = JSON.parse(localStorage.getItem('donationsList') || '[]');
-            // Sort donations before deleting to match display order
-            donations.sort((a, b) => {
-                let dateA = new Date(a.dateTime);
-                let dateB = new Date(b.dateTime);
-                if (isDescending) {
-                    return dateB - dateA;
-                } else {
-                    return dateA - dateB;
-                }
-            });
+            const donations = getSortedDonations();
             donations.splice(idx, 1);
             localStorage.setItem('donationsList', JSON.stringify(donations));
             loadDonations();
         }
     });
+
+    // Initial render
     loadDonations();
 });

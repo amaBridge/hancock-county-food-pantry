@@ -1,6 +1,40 @@
+// ============================================================
+// index.js
+// ============================================================
+// Home page logic (index.html)
+//
+// Quick navigation
+// - Donation submit / receipt: handleSubmitDonation()
+// - Company dropdown sync:     updateCompanyDropdown()
+// - Add-new-donor UI:          applyNewDonor(), handleCompanyChange()
+// - Category + weight logging: selectCategory(), logWeight(), totals
+// - Startup wiring:            DOMContentLoaded handler at bottom
+// ============================================================
+
 // =============================
 // DONATION SUBMIT LOGIC
 // =============================
+function openReceiptPage(donation, { autoPrint = true } = {}) {
+    // Writes the donation into localStorage under a short-lived key and opens receipt.html.
+    // This is more reliable on iPad than trying to auto-print from injected HTML.
+    const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    try {
+        localStorage.setItem(`receipt:${id}`, JSON.stringify(donation));
+    } catch {
+        // If storage is full/blocked, fall back to alert.
+        alert('Unable to prepare receipt data (storage unavailable).');
+        return;
+    }
+
+    const url = `receipt.html?id=${encodeURIComponent(id)}${autoPrint ? '&autoprint=1' : ''}`;
+    const win = window.open(url, '_blank');
+    if (!win) {
+        alert('Popup blocked. Please allow popups to print receipts.');
+        return;
+    }
+    try { win.focus(); } catch { }
+}
+
 function handleSubmitDonation() {
     const companySelect = document.getElementById('companySelect');
     const companyName = companySelect ? companySelect.value : '';
@@ -33,46 +67,7 @@ function handleSubmitDonation() {
     donations.push(donation);
     localStorage.setItem('donationsList', JSON.stringify(donations));
     if (confirm('Would you like to print a receipt?')) {
-        // Pretty, black and white receipt with logo
-        const receipt = `
-        <html><head><title>Donation Receipt</title>
-        <style>
-            body { font-family: Arial, sans-serif; color: #111; background: #fff; margin: 0; padding: 0; }
-            .receipt-container { max-width: 420px; margin: 24px auto; border: 2px solid #111; border-radius: 10px; padding: 24px 32px; background: #fff; }
-            .logo { display: block; margin: 0 auto 16px auto; max-width: 120px; }
-            h1 { text-align: center; font-size: 1.6em; margin-bottom: 0.2em; letter-spacing: 1px; }
-            .subtitle { text-align: center; font-size: 1em; margin-bottom: 1.2em; color: #222; }
-            .info-table { width: 100%; margin-bottom: 1.2em; border-collapse: collapse; }
-            .info-table td { padding: 4px 0; font-size: 1em; }
-            .donation-table { width: 100%; border-collapse: collapse; margin-bottom: 1.2em; }
-            .donation-table th, .donation-table td { border: 1px solid #111; padding: 6px 10px; font-size: 1em; text-align: left; }
-            .donation-table th { background: #eee; }
-            .footer { text-align: center; font-size: 0.95em; margin-top: 1.5em; color: #222; }
-        </style>
-        </head><body>
-        <div class="receipt-container">
-            <img src="images/HCFP-Logo-Edited-removebg-preview.png" class="logo" alt="HCFP Logo">
-            <h1>Donation Receipt</h1>
-            <div class="subtitle">Hancock County Food Pantry</div>
-            <table class="info-table">
-                <tr><td><strong>Date & Time:</strong></td><td>${donation.dateTime}</td></tr>
-                <tr><td><strong>Company Name:</strong></td><td>${donation.companyName}</td></tr>
-            </table>
-            <table class="donation-table">
-                <tr><th>Category</th><th>Weight (lbs)</th>${donation.temperature ? '<th>Temp (°F)</th>' : ''}</tr>
-                <tr><td>Produce</td><td>${donation.Produce.toFixed(2)}</td>${donation.temperature ? '<td rowspan=5 style="vertical-align:middle;text-align:center;font-weight:bold;">' + donation.temperature + '</td>' : ''}</tr>
-                <tr><td>Frozen Meats</td><td>${donation['Frozen Meats'].toFixed(2)}</td></tr>
-                <tr><td>Misc Frozen</td><td>${donation['Misc Frozen'].toFixed(2)}</td></tr>
-                <tr><td>Bakery</td><td>${donation.Bakery.toFixed(2)}</td></tr>
-                <tr><td>Dry</td><td>${donation.Dry.toFixed(2)}</td></tr>
-            </table>
-            <div class="footer">Thank you for your generous donation!</div>
-        </div>
-        <script>window.onload = function() { window.print(); }<\/script>
-        </body></html>
-        `;
-        const win = window.open('', '_blank');
-        win.document.write(receipt);
+                openReceiptPage(donation, { autoPrint: true });
     }
     // Redirect to Donations Management page
     window.location.href = 'donations-management.html';
@@ -81,6 +76,12 @@ function handleSubmitDonation() {
 // DONOR DROPDOWN SYNC
 // =============================
 function updateCompanyDropdown() {
+    // Populates the "Select Company" dropdown from localStorage('donorList').
+    //
+    // Notes:
+    // - We preserve the placeholder option at index 0.
+    // - We optionally preserve an "Add New" option for older UIs.
+    // - We support legacy donor storage format (array of { name }).
     const companySelect = document.getElementById('companySelect');
     if (!companySelect) return;
     // Save current selection
@@ -95,11 +96,25 @@ function updateCompanyDropdown() {
     }
     const placeholderOption = companySelect.options[0];
 
-    // Detect optional "Add New" option (older UI)
-    const addNewOption = [...companySelect.options].find(opt =>
+    // Detect (or create) the "Add New Donor" option.
+    // Requirement: it must always be at the top of the donor list (index 1).
+    let addNewOption = [...companySelect.options].find(opt =>
         (opt.value || '').toLowerCase() === 'new' ||
         (opt.text || '').toLowerCase().includes('add new')
     ) || null;
+
+    if (!addNewOption) {
+        addNewOption = document.createElement('option');
+        addNewOption.value = 'New';
+        addNewOption.text = 'Add New Donor...';
+        companySelect.add(addNewOption);
+    }
+
+    // Move "Add New Donor" to index 1 (right under placeholder) if needed.
+    if (companySelect.options.length >= 2 && companySelect.options[1] !== addNewOption) {
+        companySelect.remove(addNewOption.index);
+        companySelect.add(addNewOption, 1);
+    }
 
     // Clear all options except placeholder and optional addNewOption
     for (let i = companySelect.options.length - 1; i >= 0; i--) {
@@ -109,11 +124,12 @@ function updateCompanyDropdown() {
         companySelect.remove(i);
     }
 
-    // Get donors from localStorage (support legacy object format)
+    // Load donors from storage
     let donors = [];
     try {
         const raw = JSON.parse(localStorage.getItem('donorList')) || [];
         if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
+            // Legacy format: [{ name: "Acme" }, ...] -> ["Acme", ...]
             donors = raw
                 .map(d => (typeof d?.name === 'string' ? d.name : ''))
                 .filter(Boolean);
@@ -124,6 +140,17 @@ function updateCompanyDropdown() {
     } catch {
         donors = [];
     }
+    // Favorites (stored as lowercased names)
+    let favoriteSet = new Set();
+    try {
+        const favRaw = JSON.parse(localStorage.getItem('donorFavorites') || '[]');
+        if (Array.isArray(favRaw)) {
+            favoriteSet = new Set(favRaw.map(s => String(s || '').trim().toLowerCase()).filter(Boolean));
+        }
+    } catch {
+        favoriteSet = new Set();
+    }
+
     // Get sortMode from localStorage (default to 'date-desc')
     let sortMode = localStorage.getItem('donorSortMode') || 'date-desc';
     if (sortMode === 'date-desc') {
@@ -135,17 +162,29 @@ function updateCompanyDropdown() {
     } else if (sortMode === 'alpha-desc') {
         donors = donors.slice().sort((a, b) => b.localeCompare(a));
     }
+    // Pin favorites to the top, preserving the chosen sort order within each group
+    const favorites = [];
+    const nonFavorites = [];
     donors.forEach(name => {
+        const key = String(name || '').trim().toLowerCase();
+        if (favoriteSet.has(key)) favorites.push(name);
+        else nonFavorites.push(name);
+    });
+
+    [...favorites, ...nonFavorites].forEach(name => {
+        const normalized = String(name || '').trim();
+        if (!normalized) return;
+
         // Don't add if already present (shouldn't happen)
-        if ([...companySelect.options].some(opt => opt.text.toLowerCase() === name.toLowerCase())) return;
+        if ([...companySelect.options].some(opt => String(opt.value || '').toLowerCase() === normalized.toLowerCase())) return;
+
+        const isFav = favoriteSet.has(normalized.toLowerCase());
         const opt = document.createElement('option');
-        opt.value = name;
-        opt.text = name;
-        if (addNewOption) {
-            companySelect.add(opt, addNewOption.index);
-        } else {
-            companySelect.add(opt);
-        }
+        opt.value = normalized;
+        opt.text = isFav ? `★ ${normalized}` : normalized;
+
+        // Append donors after placeholder + "Add New Donor"
+        companySelect.add(opt);
     });
 
     // Restore selection if possible
@@ -154,11 +193,17 @@ function updateCompanyDropdown() {
     } else {
         companySelect.value = '';
     }
+
+    // Ensure the inline add-donor UI matches the current selection.
+    if (typeof handleCompanyChange === 'function') {
+        handleCompanyChange();
+    }
 }
 // =============================
 // ADD NEW DONOR LOGIC
 // =============================
 function applyNewDonor() {
+    // Adds a new donor directly from the Home page UI (if present).
     const newDonorInput = document.getElementById('newDonorInput');
     const companySelect = document.getElementById('companySelect');
     if (!newDonorInput || !companySelect) return;
@@ -167,20 +212,39 @@ function applyNewDonor() {
         alert('Please enter a donor name.');
         return;
     }
-    // Check for duplicates (case-insensitive)
-    for (let i = 0; i < companySelect.options.length; i++) {
-        if (companySelect.options[i].text.toLowerCase() === newDonor.toLowerCase()) {
-            alert('That donor already exists in the list.');
-            return;
+
+    // Load donors from storage (and normalize legacy formats)
+    let donors = [];
+    try {
+        const raw = JSON.parse(localStorage.getItem('donorList')) || [];
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
+            donors = raw
+                .map(d => (typeof d?.name === 'string' ? d.name : ''))
+                .filter(Boolean);
+        } else {
+            donors = Array.isArray(raw) ? raw : [];
         }
+    } catch {
+        donors = [];
     }
-    // Add new donor before the 'Add New Donor' option
-    const newOption = document.createElement('option');
-    newOption.value = newDonor;
-    newOption.text = newDonor;
-    // Insert before last option (assumed to be 'Add New Donor')
-    companySelect.add(newOption, companySelect.options.length - 1);
+
+    // Check for duplicates (case-insensitive)
+    if (donors.some(d => String(d).toLowerCase() === newDonor.toLowerCase())) {
+        alert('That donor already exists in the list.');
+        companySelect.value = donors.find(d => String(d).toLowerCase() === newDonor.toLowerCase()) || '';
+        newDonorInput.value = '';
+        handleCompanyChange();
+        return;
+    }
+
+    donors.push(newDonor);
+    localStorage.setItem('donorList', JSON.stringify(donors));
+
+    // Rebuild dropdown from storage (keeps ordering consistent with donor-management sort mode)
+    updateCompanyDropdown();
     companySelect.value = newDonor;
+
+    // Clear + hide the inline UI
     newDonorInput.value = '';
     handleCompanyChange();
 }
@@ -237,10 +301,12 @@ function restartDonation() {
     if (companySelect) companySelect.value = '';
     const newDonorInput = document.getElementById('newDonorInput');
     if (newDonorInput) newDonorInput.value = '';
-    document.getElementById('addNewDonorSection').style.display = 'none';
+    const addNewDonorSection = document.getElementById('addNewDonorSection');
+    if (addNewDonorSection) addNewDonorSection.style.display = 'none';
 }
 
 function logWeight() {
+    // Records a single weight entry into the selected category total.
     const category = selectedCategory;
     if (!category || !(category in categoryTotals)) {
         alert('Please select a category.');
@@ -314,8 +380,12 @@ function handleCompanyChange() {
     const select = document.getElementById('companySelect');
     const addNewDonorSection = document.getElementById('addNewDonorSection');
     if (select && addNewDonorSection) {
+        const row = select.closest('.company-row');
+        if (row) row.classList.toggle('is-adding', select.value === 'New');
         if (select.value === 'New') {
-            addNewDonorSection.style.display = '';
+            addNewDonorSection.style.display = 'flex';
+            const newDonorInput = document.getElementById('newDonorInput');
+            if (newDonorInput) newDonorInput.focus();
         } else {
             addNewDonorSection.style.display = 'none';
         }
@@ -338,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!document.hidden) updateCompanyDropdown();
     });
     window.addEventListener('storage', (e) => {
-        if (e.key === 'donorList' || e.key === 'donorSortMode') updateCompanyDropdown();
+        if (e.key === 'donorList' || e.key === 'donorSortMode' || e.key === 'donorFavorites') updateCompanyDropdown();
     });
 
     // Company select
@@ -363,6 +433,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const applyDonorBtn = document.getElementById('applyDonorBtn');
     if (applyDonorBtn) {
         applyDonorBtn.addEventListener('click', applyNewDonor);
+    }
+
+    // Allow pressing Enter in the inline donor input
+    const newDonorInput = document.getElementById('newDonorInput');
+    if (newDonorInput) {
+        newDonorInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyNewDonor();
+            }
+        });
     }
 
     // Submit donation button

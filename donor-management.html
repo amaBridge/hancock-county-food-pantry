@@ -1,3 +1,13 @@
+<!-- ============================================================
+     PAGE: Donor Management (donor-management.html)
+     Quick-find sections:
+       - HEAD / STYLES
+       - NAVBAR
+       - HEADER
+       - ADD DONOR + SORT CONTROLS
+       - DONOR LIST
+       - SCRIPTS
+============================================================ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +15,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Donor Management</title>
   <style>
+    /* =============================
+       HEAD / STYLES
+       ============================= */
+
+    /* ---- Base / Reset ---- */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+
+    /* ---- Navbar ---- */
     .navbar {
       height: 60px; /* Set a fixed height */
       padding: 0 1.2em; /* Adjust padding to maintain alignment */
@@ -64,12 +81,14 @@
       margin: 0 0.5em;
       vertical-align: middle;
     }
+    /* ---- Layout / Container ---- */
     .container { max-width: 600px; margin: 12px auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .header { background-color: #fff; padding: 12px; display: flex; align-items: center; gap: 12px; }
     .logo { width: 16%; height: auto; max-height: 48px; object-fit: contain; }
     .header-content { text-align: left; }
     .header-content h1 { font-size: 28px; color: #9dae55; margin-bottom: 10px; }
     .header-content p { color: #5a7a92; font-size: 14px; }
+    /* ---- Add Donor + Sort Controls ---- */
     .form-section { background-color: #7095bd; padding: 12px; border-bottom: 1px solid #e0e0e0; margin: 0 10px 10px 10px; border-radius: 6px; }
     .form-section h2 { font-size: 16px; color: white; margin-bottom: 10px; font-weight: bold; }
     .input-group { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 10px; }
@@ -80,6 +99,7 @@
     .add-donor input { flex: 1; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
     .add-donor button { padding: 6px 14px; background-color: #9dae55; color: white; border: none; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; }
     .add-donor button:hover { background-color: #7fa642; }
+    /* ---- Donor List ---- */
     .donor-list { background-color: #7095bd; padding: 12px; border-radius: 6px; margin: 10px; }
     .donor-list h2 { font-size: 16px; color: white; margin-bottom: 10px; font-weight: bold; }
     .donor-list ul { list-style: none; padding: 0; }
@@ -87,6 +107,35 @@
     .donor-list input[type="text"] { width: 60%; padding: 0.2em; background: transparent; border: none; font-size: 1em; color: #fff; }
     .donor-list button { margin-left: 0.5em; background-color: #5a7a92; color: #fff; border: none; border-radius: 4px; padding: 4px 10px; font-size: 13px; font-weight: bold; cursor: pointer; }
     .donor-list button:hover { background-color: #9dae55; color: #fff; }
+
+    /* ---- Favorite (star) button ---- */
+    .donor-list button.favorite-toggle {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 10px;
+      min-height: 32px;
+    }
+    .donor-list button.favorite-toggle:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.95);
+    }
+    .donor-list button.favorite-toggle.is-favorite {
+      background: rgba(255, 215, 0, 0.18);
+      border-color: rgba(255, 215, 0, 0.55);
+      color: #ffd54a;
+      text-shadow: 0 0 6px rgba(255, 213, 74, 0.45);
+    }
+    .donor-list button.favorite-toggle.is-favorite:hover {
+      background: rgba(255, 215, 0, 0.26);
+      color: #ffdf7a;
+    }
+    .donor-list button.favorite-toggle:focus-visible {
+      outline: 2px solid rgba(255, 215, 0, 0.7);
+      outline-offset: 2px;
+    }
     .form-section button {
       background-color: #5a7a92;
       color: #fff;
@@ -110,28 +159,37 @@
 </head>
 <body>
   <!-- =============================
-       TOP NAVIGATION PANE
+       NAVBAR
   ============================== -->
-    <nav class="navbar">
-        <a class="nav-logo" href="index.html">
-            <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
-        </a>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <span class="nav-divider"></span>
-            <a href="donor-management.html">Donor Management</a>
-            <span class="nav-divider"></span>
-            <a href="donations-management.html">Donations Management</a>
-        </div>
-    </nav>
+  <nav class="navbar">
+    <a class="nav-logo" href="index.html">
+      <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <span class="nav-divider"></span>
+      <a href="donor-management.html">Donor Management</a>
+      <span class="nav-divider"></span>
+      <a href="donations-management.html">Donations Management</a>
+    </div>
+  </nav>
+  <!-- =============================
+       MAIN CONTAINER
+  ============================== -->
   <div class="container">
+
+    <!-- =============================
+         HEADER
+    ============================== -->
     <div class="header">
-      <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo">
       <div class="header-content">
         <h1>Donor Management</h1>
         <p>For Hancock County Food Pantry</p>
       </div>
     </div>
+    <!-- =============================
+         ADD DONOR + SORT CONTROLS
+    ============================== -->
     <div class="form-section">
       <div class="add-donor">
         <input type="text" id="newDonorName" placeholder="Add new donor...">
@@ -143,15 +201,29 @@
         <button id="sortDateAsc" title="Oldest First">Date &#8593;</button>
         <button id="sortAlphaAsc" title="A to Z">A-Z</button>
         <button id="sortAlphaDesc" title="Z to A">Z-A</button>
+
+        <span style="flex:1;"></span>
+
+        <label style="display:flex;align-items:center;gap:8px;color:white;font-weight:bold;white-space:nowrap;">
+          <input type="checkbox" id="favoritesOnTopToggle">
+          Favorites On Top
+        </label>
       </div>
     </div>
-    <div class="donor-list">
+        <!-- =============================
+          DONOR LIST
+        ============================== -->
+        <div class="donor-list">
       <h2>Current Donors</h2>
       <ul id="donorList">
         <!-- Donor items will be populated here -->
       </ul>
     </div>
   </div>
-    <script src="donor-management.js"></script>
+
+  <!-- =============================
+       SCRIPTS
+  ============================== -->
+  <script src="donor-management.js"></script>
 </body>
 </html>
