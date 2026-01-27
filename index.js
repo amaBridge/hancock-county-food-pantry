@@ -85,15 +85,45 @@ function updateCompanyDropdown() {
     if (!companySelect) return;
     // Save current selection
     const current = companySelect.value;
-    // Remove all except the first (placeholder) and last (Add New Donor)
-    while (companySelect.options.length > 2) {
-        companySelect.remove(1);
+
+    // Ensure placeholder exists at index 0
+    if (companySelect.options.length === 0) {
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.text = '-- Select a Company --';
+        companySelect.add(placeholder);
     }
-    // Get donors from localStorage
+    const placeholderOption = companySelect.options[0];
+
+    // Detect optional "Add New" option (older UI)
+    const addNewOption = [...companySelect.options].find(opt =>
+        (opt.value || '').toLowerCase() === 'new' ||
+        (opt.text || '').toLowerCase().includes('add new')
+    ) || null;
+
+    // Clear all options except placeholder and optional addNewOption
+    for (let i = companySelect.options.length - 1; i >= 0; i--) {
+        const opt = companySelect.options[i];
+        if (opt === placeholderOption) continue;
+        if (addNewOption && opt === addNewOption) continue;
+        companySelect.remove(i);
+    }
+
+    // Get donors from localStorage (support legacy object format)
     let donors = [];
     try {
-        donors = JSON.parse(localStorage.getItem('donorList')) || [];
-    } catch {}
+        const raw = JSON.parse(localStorage.getItem('donorList')) || [];
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
+            donors = raw
+                .map(d => (typeof d?.name === 'string' ? d.name : ''))
+                .filter(Boolean);
+            localStorage.setItem('donorList', JSON.stringify(donors));
+        } else {
+            donors = Array.isArray(raw) ? raw : [];
+        }
+    } catch {
+        donors = [];
+    }
     // Get sortMode from localStorage (default to 'date-desc')
     let sortMode = localStorage.getItem('donorSortMode') || 'date-desc';
     if (sortMode === 'date-desc') {
@@ -111,10 +141,19 @@ function updateCompanyDropdown() {
         const opt = document.createElement('option');
         opt.value = name;
         opt.text = name;
-        companySelect.add(opt, companySelect.options.length - 1);
+        if (addNewOption) {
+            companySelect.add(opt, addNewOption.index);
+        } else {
+            companySelect.add(opt);
+        }
     });
+
     // Restore selection if possible
-    companySelect.value = current;
+    if ([...companySelect.options].some(o => o.value === current)) {
+        companySelect.value = current;
+    } else {
+        companySelect.value = '';
+    }
 }
 // =============================
 // ADD NEW DONOR LOGIC
@@ -291,6 +330,17 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCompanyDropdown();
     // Allow donor-management page to trigger dropdown update if opened as popup
     window.updateCompanyDropdown = updateCompanyDropdown;
+
+    // Refresh dropdown when returning to this page (incl. back/forward cache)
+    window.addEventListener('pageshow', updateCompanyDropdown);
+    window.addEventListener('focus', updateCompanyDropdown);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) updateCompanyDropdown();
+    });
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'donorList' || e.key === 'donorSortMode') updateCompanyDropdown();
+    });
+
     // Company select
     const select = document.getElementById('companySelect');
     if (select) {
