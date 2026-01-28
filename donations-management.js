@@ -46,6 +46,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const orderToggleBtn = document.getElementById('orderToggleBtn');
     const addNewDonationBtn = document.getElementById('addNewDonationBtn');
 
+    let isNavigatingToNewDonation = false;
+    function goToNewDonation(event) {
+        // Some iOS Safari cases can be finicky about click vs touch; treat this as a user gesture.
+        if (event && typeof event.preventDefault === 'function') event.preventDefault();
+        if (isNavigatingToNewDonation) return;
+        isNavigatingToNewDonation = true;
+        window.location.assign('index.html');
+    }
+
     // Controls the sort order in the UI
     let isDescending = true;
 
@@ -122,9 +131,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (addNewDonationBtn) {
-        addNewDonationBtn.addEventListener('click', function () {
-            window.location.href = 'index.html';
-        });
+        addNewDonationBtn.addEventListener('click', goToNewDonation);
+        // iOS Safari: ensure tap works even when click is delayed or swallowed.
+        addNewDonationBtn.addEventListener('pointerup', goToNewDonation);
+        addNewDonationBtn.addEventListener('touchend', goToNewDonation, { passive: false });
     }
 
     tableBody.addEventListener('click', function(e) {
