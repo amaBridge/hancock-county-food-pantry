@@ -487,6 +487,13 @@ let donorComboActiveIndex = -1;
 let donorComboItems = [];
 let donorComboQuery = '';
 
+// When a native modal (confirm/alert) returns focus to the input, it can retrigger
+// our focus handler and reopen the dropdown. Use a short suppression window.
+let donorComboSuppressOpenUntil = 0;
+function suppressDonorComboboxAutoOpen(ms = 900) {
+    donorComboSuppressOpenUntil = Date.now() + Math.max(0, Number(ms) || 0);
+}
+
 let appToastTimer = null;
 
 function showAppToast(message, { timeoutMs = 2400 } = {}) {
@@ -567,6 +574,8 @@ function addOrSelectDonorByName(name) {
     const canonical = already ? String(already).trim() : typed;
     const didCreate = !already;
     if (didCreate) {
+        // Prevent the confirm dialog from causing a focus-triggered re-open.
+        suppressDonorComboboxAutoOpen(1200);
         const ok = confirm(`Add new donor "${canonical}"?`);
         if (!ok) {
             showAppToast('New donor was not added.');
@@ -583,6 +592,15 @@ function addOrSelectDonorByName(name) {
 
     if (didCreate) {
         showAppToast(`New donor added: ${canonical}`);
+
+        // If the donor combobox dropdown is currently open, close it after creation.
+        // (Call sites also close on success; this ensures it happens for all create paths.)
+        try {
+            if (typeof closeDonorCombobox === 'function' && typeof donorComboOpen !== 'undefined' && donorComboOpen) {
+                suppressDonorComboboxAutoOpen(900);
+                closeDonorCombobox();
+            }
+        } catch { }
     }
     return canonical;
 }
@@ -627,25 +645,39 @@ function getDonorComboboxOptionItems() {
     if (!select || !input) return [];
 
     const query = String(donorComboQuery || '').trim().toLowerCase();
-    const options = [...select.options]
-        .filter(opt => String(opt.value || '') !== '') // exclude placeholder
-        .filter(opt => {
-            if (String(opt.value || '').toLowerCase() === 'new') return true;
-            if (!query) return true;
-            const label = normalizeDonorLabel(opt.textContent || opt.value);
-            return label.toLowerCase().includes(query);
-        });
 
-    return options.map(opt => {
+    // Only show "Add New Donor..." if there are no other results.
+    const donorOptions = [...select.options]
+        .filter(opt => String(opt.value || '') !== '') // exclude placeholder
+        .filter(opt => String(opt.value || '').toLowerCase() !== 'new');
+
+    const filteredDonors = donorOptions.filter(opt => {
+        if (!query) return true;
+        const label = normalizeDonorLabel(opt.textContent || opt.value);
+        return label.toLowerCase().includes(query);
+    });
+
+    const mappedDonors = filteredDonors.map(opt => {
         const rawText = String(opt.textContent || opt.value || '');
         const isFavorite = /^\s*★\s*/.test(rawText);
         return {
             value: opt.value,
             label: normalizeDonorLabel(rawText),
-            isAddNew: String(opt.value || '').toLowerCase() === 'new',
+            isAddNew: false,
             isFavorite
         };
     });
+
+    if (mappedDonors.length > 0) return mappedDonors;
+
+    // No donor matches: show the add-new option.
+    const addOpt = [...select.options].find(o => String(o.value || '').toLowerCase() === 'new');
+    return [{
+        value: addOpt ? addOpt.value : 'New',
+        label: 'Add New Donor...',
+        isAddNew: true,
+        isFavorite: false
+    }];
 }
 
 function openDonorCombobox() {
@@ -708,8 +740,9 @@ function renderDonorComboboxList() {
         row.className = 'donor-combo-item' + (idx === donorComboActiveIndex ? ' active' : '');
         row.setAttribute('role', 'option');
         row.setAttribute('aria-selected', idx === donorComboActiveIndex ? 'true' : 'false');
+        const typedLabel = String(input.value || '').trim();
         row.textContent = item.isAddNew
-            ? 'Add New Donor...'
+            ? (typedLabel ? `Add New Donor: "${typedLabel}"` : 'Add New Donor...')
             : (item.isFavorite ? `★ ${item.label}` : item.label);
 
         // Use pointerdown so selection happens before input blur.
@@ -753,6 +786,7 @@ function initDonorCombobox() {
     updateClearState();
 
     input.addEventListener('focus', () => {
+        if (Date.now() < donorComboSuppressOpenUntil) return;
         openDonorCombobox();
     });
 
