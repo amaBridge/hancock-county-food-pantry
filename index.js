@@ -810,8 +810,8 @@ function renderDonorComboboxList() {
             finalizeDonorSelection({ closeDropdown: true, blurInput: true });
         };
 
+        // Use click only; iOS Safari can fire touchend even after a scroll gesture.
         row.addEventListener('click', selectThisRow);
-        row.addEventListener('touchend', selectThisRow, { passive: false });
 
         list.appendChild(row);
     });
@@ -829,12 +829,15 @@ function initDonorCombobox() {
     if (!combo || !input || !list || !select) return;
 
     // Track touch scrolling within the dropdown list so a swipe doesn't select an item.
+    // iOS Safari in particular can be aggressive about turning scroll swipes into taps.
     let donorComboListTouchStartX = 0;
     let donorComboListTouchStartY = 0;
+    let donorComboListTouchMoved = false;
     let donorComboListLastScrollAt = 0;
 
     window.wasDonorComboListScrollingRecently = function wasDonorComboListScrollingRecently() {
-        return Date.now() - donorComboListLastScrollAt < 250;
+        // Longer window helps iOS where scroll momentum continues after finger lift.
+        return donorComboListTouchMoved || (Date.now() - donorComboListLastScrollAt < 900);
     };
 
     list.addEventListener('scroll', () => {
@@ -846,6 +849,7 @@ function initDonorCombobox() {
         if (!t) return;
         donorComboListTouchStartX = t.clientX;
         donorComboListTouchStartY = t.clientY;
+        donorComboListTouchMoved = false;
     }, { passive: true });
 
     list.addEventListener('touchmove', (e) => {
@@ -853,7 +857,16 @@ function initDonorCombobox() {
         if (!t) return;
         const dx = Math.abs(t.clientX - donorComboListTouchStartX);
         const dy = Math.abs(t.clientY - donorComboListTouchStartY);
-        if (dx > 8 || dy > 8) donorComboListLastScrollAt = Date.now();
+        if (dx > 10 || dy > 10) {
+            donorComboListTouchMoved = true;
+            donorComboListLastScrollAt = Date.now();
+        }
+    }, { passive: true });
+
+    list.addEventListener('touchend', () => {
+        // Keep the "recently scrolling" guard active briefly after finger lift.
+        if (donorComboListTouchMoved) donorComboListLastScrollAt = Date.now();
+        setTimeout(() => { donorComboListTouchMoved = false; }, 350);
     }, { passive: true });
 
     function updateClearState() {
