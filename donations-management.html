@@ -145,6 +145,23 @@
         tr:nth-child(odd) { background-color: #e0e0e0; }
         td { font-size: 12px; }
 
+        /* Keep Actions visible while scrolling horizontally */
+        th.sticky-col,
+        td.sticky-col {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: inherit;
+        }
+        th.sticky-col {
+            z-index: 4;
+            background: #5a7a92;
+        }
+        td.sticky-col {
+            box-shadow: 2px 0 0 rgba(0, 0, 0, 0.08);
+            min-width: 120px;
+        }
+
         /* ---- Table Toolbar Buttons ---- */
         .table-toolbar {
             display: flex;
@@ -191,6 +208,12 @@
         .delete-btn:hover { background-color: #7fa642; }
                 .receipt-btn { padding: 4px 10px; background-color: #5a7a92; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; justify-content: center; width: 70px; }
         .receipt-btn:hover { background-color: #4a6a82; }
+
+                /* Make action buttons same width everywhere */
+                .delete-btn,
+                .receipt-btn {
+                    width: 84px;
+                }
 
         @media (max-width: 768px) {
           .logo {
@@ -327,7 +350,7 @@
                         min-height: 40px;
                         padding: 8px 14px;
                         font-size: 14px;
-                        width: auto;
+                        width: 96px;
                     }
 
                     .toolbar-btn {
@@ -391,7 +414,7 @@
                         min-height: 40px;
                         padding: 8px 14px;
                         font-size: 14px;
-                        width: auto;
+                        width: 96px;
                     }
                 }
     </style>
@@ -447,6 +470,7 @@
                 <table id="donationsTable">
                     <thead>
                         <tr>
+                            <th class="sticky-col">Actions</th>
                             <th>Date / Time</th>
                             <th>Company</th>
                             <th>Produce (lb)</th>
@@ -455,7 +479,6 @@
                             <th>Misc Frozen (lb)</th>
                             <th>Bakery (lb)</th>
                             <th>Dry (lb)</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>

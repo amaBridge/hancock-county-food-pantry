@@ -92,6 +92,12 @@ document.addEventListener('DOMContentLoaded', function() {
         donations.forEach((donation, idx) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
+                <td class="sticky-col">
+                    <div class="actions">
+                        <button data-idx="${idx}" class="receipt-btn">Receipt</button>
+                        <button data-idx="${idx}" class="delete-btn">Delete</button>
+                    </div>
+                </td>
                 <td>${donation.dateTime}</td>
                 <td>${donation.companyName}</td>
                 <td>${toFixed2(donation.Produce)}</td>
@@ -100,12 +106,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${toFixed2(donation['Misc Frozen'])}</td>
                 <td>${toFixed2(donation.Bakery)}</td>
                 <td>${toFixed2(donation.Dry)}</td>
-                <td>
-                    <div class="actions">
-                        <button data-idx="${idx}" class="receipt-btn">Receipt</button>
-                        <button data-idx="${idx}" class="delete-btn">Delete</button>
-                    </div>
-                </td>
             `;
             tableBody.appendChild(tr);
         });
