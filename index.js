@@ -801,6 +801,46 @@ function initDonorCombobox() {
     syncDonorComboboxFromSelect();
     updateClearState();
 
+    let lastEnterHandledAt = 0;
+    function handleDonorComboEnter(e) {
+        const now = Date.now();
+        if (now - lastEnterHandledAt < 150) return;
+        lastEnterHandledAt = now;
+
+        e?.preventDefault?.();
+
+        // If the user typed an exact match, select it.
+        const typedLower = String(input.value || '').trim().toLowerCase();
+        const candidates = getDonorComboboxOptionItems().filter(i => !i.isAddNew);
+        const exact = candidates.find(i => String(i.label || '').toLowerCase() === typedLower);
+        if (exact) {
+            setSelectedDonorValue(exact.value);
+            closeDonorCombobox();
+            return;
+        }
+
+        if (!donorComboOpen) {
+            openDonorCombobox();
+            return;
+        }
+
+        // If nothing is highlighted, default to the first item on Enter.
+        if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
+
+        // If the list is empty (should be rare), just leave it open.
+        const chosen = donorComboItems[donorComboActiveIndex];
+        if (!chosen) return;
+
+        if (chosen.isAddNew) {
+            const createdOrSelected = addOrSelectDonorByName(String(input.value || '').trim());
+            if (createdOrSelected) closeDonorCombobox();
+            return;
+        }
+
+        setSelectedDonorValue(chosen.value);
+        closeDonorCombobox();
+    }
+
     input.addEventListener('focus', () => {
         if (Date.now() < donorComboSuppressOpenUntil) return;
         openDonorCombobox();
@@ -820,6 +860,15 @@ function initDonorCombobox() {
         donorComboActiveIndex = 0;
         renderDonorComboboxList();
         updateClearState();
+    });
+
+    // Mobile keyboards sometimes don't emit a reliable keydown for Enter/Done.
+    // beforeinput fires with insertLineBreak/insertParagraph on many browsers.
+    input.addEventListener('beforeinput', (e) => {
+        const type = String(e?.inputType || '');
+        if (type === 'insertLineBreak' || type === 'insertParagraph') {
+            handleDonorComboEnter(e);
+        }
     });
 
     if (clearBtn) {
@@ -871,38 +920,17 @@ function initDonorCombobox() {
             return;
         }
         if (key === 'Enter') {
-            e.preventDefault();
-
-            // If the user typed an exact match, select it.
-            const typed = String(input.value || '').trim().toLowerCase();
-            const candidates = getDonorComboboxOptionItems().filter(i => !i.isAddNew);
-            const exact = candidates.find(i => String(i.label || '').toLowerCase() === typed);
-            if (exact) {
-                setSelectedDonorValue(exact.value);
-                closeDonorCombobox();
-                return;
-            }
-
-            if (!donorComboOpen) {
-                openDonorCombobox();
-                return;
-            }
-
-            // If nothing is highlighted, default to the first item on Enter.
-            if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
-
-            const chosen = donorComboItems[donorComboActiveIndex];
-            if (chosen) {
-                if (chosen.isAddNew) {
-                    const createdOrSelected = addOrSelectDonorByName(String(input.value || '').trim());
-                    if (createdOrSelected) closeDonorCombobox();
-                    return;
-                }
-
-                setSelectedDonorValue(chosen.value);
-                closeDonorCombobox();
-            }
+            handleDonorComboEnter(e);
             return;
+        }
+    });
+
+    // Extra fallback: some mobile browsers only deliver Enter on keyup.
+    input.addEventListener('keyup', (e) => {
+        const key = e.key;
+        const code = /** @type {any} */ (e).keyCode;
+        if (key === 'Enter' || code === 13) {
+            handleDonorComboEnter(e);
         }
     });
 
