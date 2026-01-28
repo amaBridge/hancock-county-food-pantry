@@ -10,7 +10,37 @@
 // - localStorage('donationsList'): array of donation objects created on Home.
 // ============================================================
 
+function initNavbarMenu() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    const toggleButton = navbar.querySelector('.nav-toggle');
+    const navLinks = navbar.querySelector('.nav-links');
+    if (!toggleButton || !navLinks) return;
+
+    function setOpen(isOpen) {
+        navbar.classList.toggle('nav-open', isOpen);
+        toggleButton.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggleButton.addEventListener('click', function () {
+        setOpen(!navbar.classList.contains('nav-open'));
+    });
+
+    navLinks.addEventListener('click', function (event) {
+        const target = event.target;
+        if (target && target.matches && target.matches('a')) {
+            setOpen(false);
+        }
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) setOpen(false);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    initNavbarMenu();
+
     // DOM anchors (only exist on donations-management.html)
     const tableBody = document.querySelector('#donationsTable tbody');
     const orderToggleBtn = document.getElementById('orderToggleBtn');

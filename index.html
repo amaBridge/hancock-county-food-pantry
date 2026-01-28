@@ -999,11 +999,11 @@
         <div class="category-section">
             <h2>Select Category</h2>
             <div class="button-group">
-                <button class="category-btn" onclick="selectCategory(this)">Produce</button>
-                <button class="category-btn" onclick="selectCategory(this)">Frozen Meats</button>
-                <button class="category-btn" onclick="selectCategory(this)">Misc Frozen</button>
-                <button class="category-btn" onclick="selectCategory(this)">Bakery</button>
-                <button class="category-btn" onclick="selectCategory(this)">Dry</button>
+                <button class="category-btn">Produce</button>
+                <button class="category-btn">Frozen Meats</button>
+                <button class="category-btn">Misc Frozen</button>
+                <button class="category-btn">Bakery</button>
+                <button class="category-btn">Dry</button>
             </div>
         </div>
         
@@ -1071,35 +1071,6 @@
     <!-- =============================
                      SCRIPTS
          ============================== -->
-    <script>
-    (function () {
-        const navbar = document.querySelector('.navbar');
-        if (!navbar) return;
-        const toggleButton = navbar.querySelector('.nav-toggle');
-        const navLinks = navbar.querySelector('.nav-links');
-        if (!toggleButton || !navLinks) return;
-
-        function setOpen(isOpen) {
-            navbar.classList.toggle('nav-open', isOpen);
-            toggleButton.setAttribute('aria-expanded', String(isOpen));
-        }
-
-        toggleButton.addEventListener('click', function () {
-            setOpen(!navbar.classList.contains('nav-open'));
-        });
-
-        navLinks.addEventListener('click', function (event) {
-            const target = event.target;
-            if (target && target.matches && target.matches('a')) {
-                setOpen(false);
-            }
-        });
-
-        window.addEventListener('resize', function () {
-            if (window.innerWidth > 768) setOpen(false);
-        });
-    })();
-    </script>
-    <script src="index.js"></script>
+    <script src="index.js" defer></script>
 </body>
 </html>

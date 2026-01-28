@@ -432,6 +432,38 @@ function selectCategory(button) {
 }
 
 
+// =============================
+// NAVBAR (Hamburger toggle)
+// =============================
+function initNavbarMenu() {
+    const navbar = document.querySelector('.navbar');
+    if (!navbar) return;
+    const toggleButton = navbar.querySelector('.nav-toggle');
+    const navLinks = navbar.querySelector('.nav-links');
+    if (!toggleButton || !navLinks) return;
+
+    function setOpen(isOpen) {
+        navbar.classList.toggle('nav-open', isOpen);
+        toggleButton.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    toggleButton.addEventListener('click', function () {
+        setOpen(!navbar.classList.contains('nav-open'));
+    });
+
+    navLinks.addEventListener('click', function (event) {
+        const target = event.target;
+        if (target && target.matches && target.matches('a')) {
+            setOpen(false);
+        }
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 768) setOpen(false);
+    });
+}
+
+
 function handleCompanyChange() {
     const select = document.getElementById('companySelect');
     if (!select) return;
@@ -831,6 +863,8 @@ function initDonorCombobox() {
 // INITIALIZATION
 // =============================
 document.addEventListener('DOMContentLoaded', function() {
+    initNavbarMenu();
+
     updateCompanyDropdown();
     // Allow donor-management page to trigger dropdown update if opened as popup
     window.updateCompanyDropdown = updateCompanyDropdown;
@@ -867,6 +901,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Donor combobox (type-to-filter)
     initDonorCombobox();
+
+    // Category buttons (no inline onclick in HTML)
+    document.querySelectorAll('.category-btn').forEach((btn) => {
+        btn.addEventListener('click', () => selectCategory(btn));
+    });
+
     // Log weight button
     const logBtn = document.querySelector('.log-weight-btn');
     if (logBtn) {
