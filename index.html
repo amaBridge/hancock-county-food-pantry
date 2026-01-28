@@ -14,7 +14,10 @@
     <a class="nav-logo" href="index.html">
         <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
     </a>
-    <div class="nav-links">
+    <button class="nav-toggle" type="button" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation menu">
+        &#9776;
+    </button>
+    <div class="nav-links" id="navLinks">
         <a href="index.html">Home</a>
         <span class="nav-divider"></span>
         <a href="donor-management.html">Donor Management</a>
@@ -82,6 +85,105 @@
             background: #9dae55;
             color: #2c3e50;
             box-shadow: 0 2px 8px rgba(44, 62, 80, 0.12);
+        }
+
+        .nav-toggle {
+            display: none;
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 22px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .nav-toggle:hover {
+            background: rgba(157, 174, 85, 0.25);
+            border-color: rgba(157, 174, 85, 0.8);
+        }
+        .nav-toggle:focus {
+            outline: 2px solid #9dae55;
+            outline-offset: 2px;
+        }
+
+        /* Keep nav usable on medium-narrow screens (wrap, but stay horizontal) */
+        @media (max-width: 768px) {
+            .navbar {
+                height: auto;
+                min-height: 60px;
+                padding: 0.5rem 0.75rem;
+                flex-wrap: wrap;
+            }
+
+            .nav-links {
+                position: static;
+                left: auto;
+                transform: none;
+                width: 100%;
+                justify-content: center;
+                flex-wrap: nowrap; /* keep buttons in one row */
+                padding: 0.25rem 0;
+                gap: 0;
+            }
+
+            .nav-links a {
+                flex: 1 1 0;
+                min-width: 0;
+                white-space: normal; /* allow label to wrap */
+                line-height: 1.15;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+                hyphens: auto;
+                text-align: center;
+                padding: 6px 10px;
+                font-size: 1em;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .nav-divider {
+                margin: 0 0.25rem;
+                height: 18px;
+            }
+        }
+
+        /* Hamburger menu for very narrow screens */
+        @media (max-width: 420px) {
+            .navbar {
+                justify-content: space-between;
+            }
+
+            .nav-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.25rem;
+                width: 100%;
+                padding: 0.5rem 0 0.25rem 0;
+            }
+
+            .navbar.nav-open .nav-links {
+                display: flex;
+            }
+
+            .nav-links a {
+                width: 100%;
+                max-width: none;
+                text-align: left;
+            }
+
+            .nav-divider {
+                display: none;
+            }
         }
         /* Global Styles */
         * {
@@ -534,7 +636,8 @@
             background-color: #e0e0e0;
             padding: 10px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            /* Keep totals in one horizontal row; allow columns to shrink */
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 8px;
             margin: 10px;
             border-radius: 6px;
@@ -554,17 +657,29 @@
             text-align: center;
             color: #00E676;
             font-family: 'Courier New', monospace;
+            min-width: 0;
         }
-        
+
         .output-value {
             font-size: 16px;
             font-weight: bold;
             margin-bottom: 4px;
+            overflow-wrap: anywhere;
         }
         
         .output-label {
             font-size: 10px;
             color: #d4e4f7;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        @media (max-width: 420px) {
+            .output-section { gap: 6px; }
+            .output-item { padding: 8px; }
+            .output-value { font-size: 14px; }
+            .output-label { font-size: 9px; }
         }
         
           /* =============================
@@ -766,5 +881,34 @@
 <!-- =============================
                  SCRIPTS
      ============================== -->
+<script>
+    (function () {
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+        const toggleButton = navbar.querySelector('.nav-toggle');
+        const navLinks = navbar.querySelector('.nav-links');
+        if (!toggleButton || !navLinks) return;
+
+        function setOpen(isOpen) {
+            navbar.classList.toggle('nav-open', isOpen);
+            toggleButton.setAttribute('aria-expanded', String(isOpen));
+        }
+
+        toggleButton.addEventListener('click', function () {
+            setOpen(!navbar.classList.contains('nav-open'));
+        });
+
+        navLinks.addEventListener('click', function (event) {
+            const target = event.target;
+            if (target && target.matches && target.matches('a')) {
+                setOpen(false);
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 420) setOpen(false);
+        });
+    })();
+</script>
 <script src="index.js"></script>
 </html>
