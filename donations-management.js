@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM anchors (only exist on donations-management.html)
     const tableBody = document.querySelector('#donationsTable tbody');
     const orderToggleBtn = document.getElementById('orderToggleBtn');
+    const addNewDonationBtn = document.getElementById('addNewDonationBtn');
 
     // Controls the sort order in the UI
     let isDescending = true;
@@ -117,6 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
             isDescending = !isDescending;
             orderToggleBtn.textContent = 'Order: ' + (isDescending ? 'Descending' : 'Ascending');
             loadDonations();
+        });
+    }
+
+    if (addNewDonationBtn) {
+        addNewDonationBtn.addEventListener('click', function () {
+            window.location.href = 'index.html';
         });
     }
 

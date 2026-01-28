@@ -142,6 +142,34 @@
         tr:nth-child(odd) { background-color: #e0e0e0; }
         td { font-size: 12px; }
 
+        /* ---- Table Toolbar Buttons ---- */
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toolbar-btn {
+            padding: 6px 14px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .toolbar-btn.secondary { background-color: #5a7a92; }
+        .toolbar-btn.secondary:hover { background-color: #4a6a82; }
+        .toolbar-btn.primary { background-color: #9dae55; }
+        .toolbar-btn.primary:hover { background-color: #7fa642; }
+
                 /* ---- Actions (Receipt/Delete) ---- */
                 .actions {
                     display: flex;
@@ -384,9 +412,12 @@
                 DONATIONS TABLE
              ============================== -->
         <div class="table-section">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="table-toolbar">
                 <h2>All Donations</h2>
-                <button id="orderToggleBtn" style="padding: 6px 14px; background-color: #5a7a92; color: white; border: none; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">Order: Descending</button>
+                <div class="toolbar-actions">
+                    <button id="addNewDonationBtn" class="toolbar-btn primary" type="button">Add New Donation</button>
+                    <button id="orderToggleBtn" class="toolbar-btn secondary" type="button">Order: Descending</button>
+                </div>
             </div>
             <table id="donationsTable">
                 <thead>
