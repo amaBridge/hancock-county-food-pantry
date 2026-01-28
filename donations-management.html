@@ -167,6 +167,12 @@
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         .toolbar-btn.secondary { background-color: #5a7a92; }
         .toolbar-btn.secondary:hover { background-color: #4a6a82; }
@@ -433,7 +439,7 @@
             <div class="table-toolbar">
                 <h2>All Donations</h2>
                 <div class="toolbar-actions">
-                    <button id="addNewDonationBtn" class="toolbar-btn primary" type="button">Add New Donation</button>
+                    <a id="addNewDonationBtn" class="toolbar-btn primary" href="index.html" role="button">Add New Donation</a>
                     <button id="orderToggleBtn" class="toolbar-btn secondary" type="button">Order: Descending</button>
                 </div>
             </div>

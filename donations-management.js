@@ -44,16 +44,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM anchors (only exist on donations-management.html)
     const tableBody = document.querySelector('#donationsTable tbody');
     const orderToggleBtn = document.getElementById('orderToggleBtn');
-    const addNewDonationBtn = document.getElementById('addNewDonationBtn');
-
-    let isNavigatingToNewDonation = false;
-    function goToNewDonation(event) {
-        // Some iOS Safari cases can be finicky about click vs touch; treat this as a user gesture.
-        if (event && typeof event.preventDefault === 'function') event.preventDefault();
-        if (isNavigatingToNewDonation) return;
-        isNavigatingToNewDonation = true;
-        window.location.assign('index.html');
-    }
 
     // Controls the sort order in the UI
     let isDescending = true;
@@ -130,12 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (addNewDonationBtn) {
-        addNewDonationBtn.addEventListener('click', goToNewDonation);
-        // iOS Safari: ensure tap works even when click is delayed or swallowed.
-        addNewDonationBtn.addEventListener('pointerup', goToNewDonation);
-        addNewDonationBtn.addEventListener('touchend', goToNewDonation, { passive: false });
-    }
+    // Add New Donation is a plain <a href="index.html"> link for maximum iOS Safari reliability.
 
     tableBody.addEventListener('click', function(e) {
         const target = e.target;
