@@ -323,6 +323,20 @@
             overflow: auto;
             z-index: 50;
         }
+
+        /* Backdrop to prevent taps/clicks landing on elements under the open dropdown */
+        .donor-combo-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            z-index: 45;
+            pointer-events: auto;
+            touch-action: none;
+        }
+        .donor-combo-backdrop.open {
+            display: block;
+        }
         .donor-combo-list.open {
             display: block;
         }
@@ -858,6 +872,9 @@
             <a href="donations-management.html">Donations Management</a>
         </div>
     </nav>
+
+    <!-- Prevent click-through when donor dropdown is open -->
+    <div id="donorComboBackdrop" class="donor-combo-backdrop" aria-hidden="true"></div>
 
     <!-- =============================
                      BODY / APP CONTAINER

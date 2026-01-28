@@ -25,6 +25,32 @@ function shouldSuppressCategoryClicksNow() {
     return Date.now() < suppressCategoryClicksUntil;
 }
 
+let donorComboBackdropTimer = null;
+function setDonorComboBackdropOpen(isOpen, { lingerMs = 0 } = {}) {
+    const backdrop = document.getElementById('donorComboBackdrop');
+    if (!backdrop) return;
+
+    if (donorComboBackdropTimer) {
+        clearTimeout(donorComboBackdropTimer);
+        donorComboBackdropTimer = null;
+    }
+
+    if (isOpen) {
+        backdrop.classList.add('open');
+        return;
+    }
+
+    if (lingerMs > 0) {
+        // Keep the backdrop around briefly to absorb any delayed/ghost clicks.
+        donorComboBackdropTimer = setTimeout(() => {
+            backdrop.classList.remove('open');
+            donorComboBackdropTimer = null;
+        }, lingerMs);
+    } else {
+        backdrop.classList.remove('open');
+    }
+}
+
 function openReceiptPage(donation, { autoPrint = true } = {}) {
     // Writes the donation into localStorage under a short-lived key and opens receipt.html.
     // This is more reliable on iPad than trying to auto-print from injected HTML.
@@ -554,6 +580,7 @@ function openDonorCombobox() {
     donorComboActiveIndex = 0;
     // Default to showing the full list when opening.
     donorComboQuery = '';
+    setDonorComboBackdropOpen(true);
     renderDonorComboboxList();
 }
 
@@ -562,6 +589,9 @@ function closeDonorCombobox() {
     donorComboActiveIndex = -1;
     const list = document.getElementById('donorComboList');
     if (list) list.classList.remove('open');
+
+    // Linger briefly to prevent click-through on touch devices.
+    setDonorComboBackdropOpen(false, { lingerMs: 800 });
 }
 
 function setSelectedDonorValue(value) {
@@ -629,6 +659,7 @@ function initDonorCombobox() {
     const input = document.getElementById('donorComboInput');
     const list = document.getElementById('donorComboList');
     const select = document.getElementById('companySelect');
+    const backdrop = document.getElementById('donorComboBackdrop');
     if (!combo || !input || !list || !select) return;
 
     syncDonorComboboxFromSelect();
@@ -702,6 +733,19 @@ function initDonorCombobox() {
         if (combo.contains(e.target)) return;
         closeDonorCombobox();
     });
+
+    // Backdrop closes the list and absorbs taps/clicks.
+    if (backdrop) {
+        backdrop.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeDonorCombobox();
+        });
+        backdrop.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    }
 
     // When the hidden select changes (e.g., after adding a donor), sync input text
     select.addEventListener('change', () => {
