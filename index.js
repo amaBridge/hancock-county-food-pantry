@@ -494,6 +494,25 @@ function suppressDonorComboboxAutoOpen(ms = 900) {
     donorComboSuppressOpenUntil = Date.now() + Math.max(0, Number(ms) || 0);
 }
 
+function finalizeDonorSelection({ closeDropdown = true, blurInput = true } = {}) {
+    // Close the dropdown and hide the mobile keyboard by blurring the input.
+    const input = document.getElementById('donorComboInput');
+    if (closeDropdown && typeof closeDonorCombobox === 'function') {
+        suppressDonorComboboxAutoOpen(900);
+        // When a user explicitly picks/adds a donor, close immediately so the
+        // full-screen backdrop doesn't block category buttons.
+        closeDonorCombobox({ lingerMs: 0 });
+    }
+    if (blurInput && input) {
+        // On mobile browsers (notably iOS), blur can be ignored if it's deferred.
+        // Try immediately (within the user gesture), then retry once shortly after.
+        try { input.blur(); } catch { }
+        setTimeout(() => {
+            try { input.blur(); } catch { }
+        }, 50);
+    }
+}
+
 let appToastTimer = null;
 
 function showAppToast(message, { timeoutMs = 2400 } = {}) {
@@ -593,14 +612,8 @@ function addOrSelectDonorByName(name) {
     if (didCreate) {
         showAppToast(`New donor added: ${canonical}`);
 
-        // If the donor combobox dropdown is currently open, close it after creation.
-        // (Call sites also close on success; this ensures it happens for all create paths.)
-        try {
-            if (typeof closeDonorCombobox === 'function' && typeof donorComboOpen !== 'undefined' && donorComboOpen) {
-                suppressDonorComboboxAutoOpen(900);
-                closeDonorCombobox();
-            }
-        } catch { }
+        // Finish the selection on mobile (close dropdown + keyboard).
+        finalizeDonorSelection({ closeDropdown: true, blurInput: true });
     }
     return canonical;
 }
@@ -690,14 +703,14 @@ function openDonorCombobox() {
     renderDonorComboboxList();
 }
 
-function closeDonorCombobox() {
+function closeDonorCombobox({ lingerMs = 800 } = {}) {
     donorComboOpen = false;
     donorComboActiveIndex = -1;
     const list = document.getElementById('donorComboList');
     if (list) list.classList.remove('open');
 
     // Linger briefly to prevent click-through on touch devices.
-    setDonorComboBackdropOpen(false, { lingerMs: 800 });
+    setDonorComboBackdropOpen(false, { lingerMs });
 }
 
 function setSelectedDonorValue(value) {
@@ -765,16 +778,18 @@ function renderDonorComboboxList() {
         row.addEventListener('pointerdown', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            armCategoryClickSuppression();
+            // Short suppression window to avoid ghost clicks without making the
+            // next intentional tap feel "dead".
+            armCategoryClickSuppression(200);
             if (item.isAddNew) {
                 const typed = String(input.value || '').trim();
                 const createdOrSelected = addOrSelectDonorByName(typed);
-                if (createdOrSelected) closeDonorCombobox();
+                if (createdOrSelected) finalizeDonorSelection({ closeDropdown: true, blurInput: true });
                 return;
             }
 
             setSelectedDonorValue(item.value);
-            closeDonorCombobox();
+            finalizeDonorSelection({ closeDropdown: true, blurInput: true });
         });
 
         list.appendChild(row);
@@ -815,7 +830,7 @@ function initDonorCombobox() {
         const exact = candidates.find(i => String(i.label || '').toLowerCase() === typedLower);
         if (exact) {
             setSelectedDonorValue(exact.value);
-            closeDonorCombobox();
+            finalizeDonorSelection({ closeDropdown: true, blurInput: true });
             return;
         }
 
@@ -833,12 +848,12 @@ function initDonorCombobox() {
 
         if (chosen.isAddNew) {
             const createdOrSelected = addOrSelectDonorByName(String(input.value || '').trim());
-            if (createdOrSelected) closeDonorCombobox();
+            if (createdOrSelected) finalizeDonorSelection({ closeDropdown: true, blurInput: true });
             return;
         }
 
         setSelectedDonorValue(chosen.value);
-        closeDonorCombobox();
+        finalizeDonorSelection({ closeDropdown: true, blurInput: true });
     }
 
     input.addEventListener('focus', () => {
@@ -987,8 +1002,8 @@ document.addEventListener('DOMContentLoaded', function() {
         select.addEventListener('change', handleCompanyChange);
 
         // Guard against ghost-clicks after native select interactions.
-        select.addEventListener('change', () => armCategoryClickSuppression());
-        select.addEventListener('pointerdown', () => armCategoryClickSuppression());
+        select.addEventListener('change', () => armCategoryClickSuppression(200));
+        select.addEventListener('pointerdown', () => armCategoryClickSuppression(200));
     }
 
     // Capture-phase suppression so inline onclick handlers never fire.
