@@ -1048,39 +1048,6 @@ function initDonorCombobox() {
 // INITIALIZATION
 // =============================
 document.addEventListener('DOMContentLoaded', function() {
-    // Visible version marker (auto-updates on every push by reading the latest GitHub commit).
-    const versionEl = document.getElementById('appVersion');
-    function setVersionText(text, { title } = {}) {
-        if (!versionEl) return;
-        versionEl.textContent = text;
-        if (title) versionEl.title = title;
-    }
-    if (versionEl) {
-        setVersionText('Version: loading…');
-
-        const repo = 'amaBridge/hancock-county-food-pantry';
-        const url = `https://api.github.com/repos/${repo}/commits/main`;
-        fetch(url, { cache: 'no-store' })
-            .then(r => (r && r.ok ? r.json() : Promise.reject(new Error('version fetch failed'))))
-            .then(data => {
-                const sha = String(data?.sha || '');
-                const shortSha = sha ? sha.slice(0, 7) : '';
-                const iso = data?.commit?.committer?.date || data?.commit?.author?.date || '';
-                const d = iso ? new Date(iso) : null;
-                const pretty = d && Number.isFinite(d.getTime())
-                    ? d.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-                    : '';
-                const label = ['Version:', shortSha || 'unknown', pretty].filter(Boolean).join(' ');
-                setVersionText(label, { title: sha || undefined });
-            })
-            .catch(() => {
-                // Offline / blocked: still show *something* so it's obvious the marker exists.
-                const now = new Date();
-                const prettyNow = now.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-                setVersionText(`Version: (offline) ${prettyNow}`);
-            });
-    }
-
     initNavbarMenu();
 
     updateCompanyDropdown();
