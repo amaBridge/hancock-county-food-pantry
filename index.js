@@ -295,7 +295,13 @@ function restartDonation() {
     // Reset UI fields
     document.getElementById('categoryLabel').textContent = 'Select Category';
     const usageValueElem = document.querySelector('.usage-value');
-    if (usageValueElem) usageValueElem.textContent = '0.00';
+    if (usageValueElem) {
+        if (usageValueElem.tagName === 'INPUT') {
+            usageValueElem.value = '0.00';
+        } else {
+            usageValueElem.textContent = '0.00';
+        }
+    }
     // Optionally reset company and donor fields
     const companySelect = document.getElementById('companySelect');
     if (companySelect) companySelect.value = '';
