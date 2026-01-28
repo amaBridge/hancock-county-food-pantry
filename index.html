@@ -533,6 +533,13 @@
             display: none;
           }
 
+                    /* Prevent iOS Safari auto-zoom on focus (inputs <16px trigger zoom) */
+                    input:not(.usage-value),
+                    select,
+                    textarea {
+                        font-size: 16px;
+                    }
+
                     /* Mobile-friendly weight/temperature layout:
                          when temperature is shown, it appears above the weight box (not overlapping it). */
                     .weight-container {

@@ -113,6 +113,14 @@
           .logo {
             display: none;
           }
+
+                    /* Prevent iOS Safari auto-zoom on focus (inputs <16px trigger zoom) */
+                    input,
+                    select,
+                    textarea {
+                        font-size: 16px;
+                    }
+
           .table-section {
             width: auto; /* Adjust to fit the table's width */
             overflow-x: auto; /* Enable horizontal scrolling if necessary */
