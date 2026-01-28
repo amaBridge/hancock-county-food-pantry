@@ -227,6 +227,110 @@
                         font-size: 16px !important;
                     }
                 }
+
+                /* Tablets (iPad etc): larger tap targets + more readable table */
+                @media (hover: none) and (pointer: coarse) and (min-width: 768px) {
+                    body {
+                        font-size: 18px;
+                    }
+
+                    .navbar {
+                        padding: 0.5rem 1rem;
+                        height: auto;
+                        min-height: 64px;
+                    }
+
+                    .nav-links a {
+                        padding: 12px 20px;
+                        font-size: 1.12em;
+                    }
+
+                    .nav-toggle {
+                        padding: 10px 14px;
+                        font-size: 28px;
+                        border-radius: 10px;
+                    }
+
+                    .container {
+                        width: calc(100% - 16px);
+                        margin: 8px auto;
+                    }
+
+                    .table-section {
+                        padding: 14px;
+                    }
+
+                    th {
+                        font-size: 15px;
+                        padding: 10px 12px;
+                    }
+
+                    td {
+                        font-size: 14px;
+                        padding: 10px 12px;
+                    }
+
+                    .actions {
+                        gap: 10px;
+                    }
+
+                    .delete-btn,
+                    .receipt-btn {
+                        min-height: 40px;
+                        padding: 8px 14px;
+                        font-size: 14px;
+                        width: auto;
+                    }
+                }
+
+                /* Desktop: match the roomier tablet-friendly UI */
+                @media (min-width: 1025px) {
+                    body {
+                        font-size: 18px;
+                    }
+
+                    .navbar {
+                        padding: 0.5rem 1rem;
+                        height: auto;
+                        min-height: 64px;
+                    }
+
+                    .nav-links a {
+                        padding: 12px 20px;
+                        font-size: 1.12em;
+                    }
+
+                    .container {
+                        width: calc(100% - 16px);
+                        margin: 8px auto;
+                    }
+
+                    .table-section {
+                        padding: 14px;
+                    }
+
+                    th {
+                        font-size: 15px;
+                        padding: 10px 12px;
+                    }
+
+                    td {
+                        font-size: 14px;
+                        padding: 10px 12px;
+                    }
+
+                    .actions {
+                        gap: 10px;
+                    }
+
+                    .delete-btn,
+                    .receipt-btn {
+                        min-height: 40px;
+                        padding: 8px 14px;
+                        font-size: 14px;
+                        width: auto;
+                    }
+                }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>

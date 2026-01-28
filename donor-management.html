@@ -289,6 +289,128 @@
         font-size: 16px !important;
       }
     }
+
+    /* Tablets (iPad etc): larger tap targets + roomier layout */
+    @media (hover: none) and (pointer: coarse) and (min-width: 768px) {
+      body {
+        font-size: 18px;
+      }
+
+      .navbar {
+        padding: 0.5rem 1rem;
+        height: auto;
+        min-height: 64px;
+      }
+
+      .nav-links a {
+        padding: 12px 20px;
+        font-size: 1.12em;
+      }
+
+      .nav-toggle {
+        padding: 10px 14px;
+        font-size: 28px;
+        border-radius: 10px;
+      }
+
+      .container {
+        width: calc(100% - 16px);
+        margin: 8px auto;
+      }
+
+      .form-section,
+      .donor-list {
+        padding: 14px;
+      }
+
+      .input-field input,
+      .add-donor input {
+        padding: 10px 12px;
+        font-size: 18px;
+        min-height: 48px;
+      }
+
+      .form-section button,
+      .add-donor button,
+      .donor-list button {
+        min-height: 44px;
+        padding: 10px 14px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .donor-list li {
+        padding: 0.75em 0;
+      }
+
+      .donor-list input[type="text"] {
+        padding: 8px 10px;
+        font-size: 18px;
+      }
+
+      .donor-list button.favorite-toggle {
+        min-height: 44px;
+        font-size: 20px;
+      }
+    }
+
+    /* Desktop: match the roomier tablet-friendly UI */
+    @media (min-width: 1025px) {
+      body {
+        font-size: 18px;
+      }
+
+      .navbar {
+        padding: 0.5rem 1rem;
+        height: auto;
+        min-height: 64px;
+      }
+
+      .nav-links a {
+        padding: 12px 20px;
+        font-size: 1.12em;
+      }
+
+      .container {
+        width: calc(100% - 16px);
+        margin: 8px auto;
+      }
+
+      .form-section,
+      .donor-list {
+        padding: 14px;
+      }
+
+      .input-field input,
+      .add-donor input {
+        padding: 10px 12px;
+        font-size: 18px;
+        min-height: 48px;
+      }
+
+      .form-section button,
+      .add-donor button,
+      .donor-list button {
+        min-height: 44px;
+        padding: 10px 14px;
+        font-size: 15px;
+        border-radius: 10px;
+      }
+
+      .donor-list li {
+        padding: 0.75em 0;
+      }
+
+      .donor-list input[type="text"] {
+        padding: 8px 10px;
+        font-size: 18px;
+      }
+
+      .donor-list button.favorite-toggle {
+        min-height: 44px;
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 <body>
