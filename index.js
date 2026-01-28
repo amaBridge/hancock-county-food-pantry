@@ -25,6 +25,16 @@ function shouldSuppressCategoryClicksNow() {
     return Date.now() < suppressCategoryClicksUntil;
 }
 
+// If the user actually taps/clicks a category button, we should not suppress it.
+// Track recent pointer/touch/mouse-down on category buttons so we can distinguish
+// deliberate interaction from "ghost clicks".
+let lastCategoryPointerDownAt = 0;
+function markCategoryPointerDown(e) {
+    const btn = e?.target && e.target.closest ? e.target.closest('.category-btn') : null;
+    if (!btn) return;
+    lastCategoryPointerDownAt = Date.now();
+}
+
 let donorComboBackdropTimer = null;
 function setDonorComboBackdropOpen(isOpen, { lingerMs = 0 } = {}) {
     const backdrop = document.getElementById('donorComboBackdrop');
@@ -1007,10 +1017,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Capture-phase suppression so inline onclick handlers never fire.
+    // Also mark real pointer interactions so we don't suppress intentional taps.
+    document.addEventListener('pointerdown', markCategoryPointerDown, true);
+    document.addEventListener('touchstart', markCategoryPointerDown, true);
+    document.addEventListener('mousedown', markCategoryPointerDown, true);
+
     document.addEventListener('click', (e) => {
         if (!shouldSuppressCategoryClicksNow()) return;
         const targetBtn = e.target && e.target.closest ? e.target.closest('.category-btn') : null;
         if (!targetBtn) return;
+
+        // If the user actually pressed on a category button, allow it.
+        // (Ghost clicks often arrive without a preceding down event.)
+        if (Date.now() - lastCategoryPointerDownAt < 800) return;
+
         e.preventDefault();
         e.stopImmediatePropagation();
         e.stopPropagation();
