@@ -793,10 +793,12 @@ function renderDonorComboboxList() {
 
         // On touch devices, users need to be able to scroll the dropdown list.
         // Selecting on pointerdown breaks scrolling (a swipe immediately picks an item).
-        const selectThisRow = (e) => {
+        const selectThisRow = (e, { bypassSuppression = false } = {}) => {
             // If the user was scrolling, ignore the tap/click.
-            if (donorComboTouchWasMovingRecently(260)) return;
-            if (Date.now() < donorComboSuppressClickUntil) return;
+            if (!bypassSuppression) {
+                if (donorComboTouchWasMovingRecently(260)) return;
+                if (Date.now() < donorComboSuppressClickUntil) return;
+            }
 
             e?.preventDefault?.();
             e?.stopPropagation?.();
@@ -817,7 +819,7 @@ function renderDonorComboboxList() {
         };
 
         // Desktop/mouse
-        row.addEventListener('click', selectThisRow);
+        row.addEventListener('click', (e) => selectThisRow(e));
 
         // Mobile/touch: only select on touchend if the finger didn't move (scroll).
         let touchStartX = 0;
@@ -844,9 +846,9 @@ function renderDonorComboboxList() {
 
         row.addEventListener('touchend', (e) => {
             if (touchMoved) return;
-            // Prevent the synthetic click that iOS can fire after touchend.
+            // Select immediately on a tap, but suppress the synthetic click iOS may fire after.
+            selectThisRow(e, { bypassSuppression: true });
             donorComboSuppressClickUntil = Date.now() + 650;
-            selectThisRow(e);
         }, { passive: false });
 
         list.appendChild(row);
@@ -1046,11 +1048,38 @@ function initDonorCombobox() {
 // INITIALIZATION
 // =============================
 document.addEventListener('DOMContentLoaded', function() {
-    // Temporary: visible build/version marker for cache debugging.
-    // Update this string whenever you need to verify iOS Safari is pulling fresh assets.
-    const APP_VERSION = '2026-01-28 18:10';
+    // Visible version marker (auto-updates on every push by reading the latest GitHub commit).
     const versionEl = document.getElementById('appVersion');
-    if (versionEl) versionEl.textContent = `Version: ${APP_VERSION}`;
+    function setVersionText(text, { title } = {}) {
+        if (!versionEl) return;
+        versionEl.textContent = text;
+        if (title) versionEl.title = title;
+    }
+    if (versionEl) {
+        setVersionText('Version: loading…');
+
+        const repo = 'amaBridge/hancock-county-food-pantry';
+        const url = `https://api.github.com/repos/${repo}/commits/main`;
+        fetch(url, { cache: 'no-store' })
+            .then(r => (r && r.ok ? r.json() : Promise.reject(new Error('version fetch failed'))))
+            .then(data => {
+                const sha = String(data?.sha || '');
+                const shortSha = sha ? sha.slice(0, 7) : '';
+                const iso = data?.commit?.committer?.date || data?.commit?.author?.date || '';
+                const d = iso ? new Date(iso) : null;
+                const pretty = d && Number.isFinite(d.getTime())
+                    ? d.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+                    : '';
+                const label = ['Version:', shortSha || 'unknown', pretty].filter(Boolean).join(' ');
+                setVersionText(label, { title: sha || undefined });
+            })
+            .catch(() => {
+                // Offline / blocked: still show *something* so it's obvious the marker exists.
+                const now = new Date();
+                const prettyNow = now.toLocaleString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+                setVersionText(`Version: (offline) ${prettyNow}`);
+            });
+    }
 
     initNavbarMenu();
 
