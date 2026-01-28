@@ -899,6 +899,37 @@ function initDonorCombobox() {
     const clearBtn = document.getElementById('donorComboClear');
     if (!combo || !input || !list || !select) return;
 
+    function focusDonorInputInGesture() {
+        // On iOS Safari, keyboard only appears if focus happens inside a user gesture.
+        try {
+            // Some browsers support the options object.
+            input.focus({ preventScroll: true });
+        } catch {
+            try { input.focus(); } catch { }
+        }
+    }
+
+    // If the user taps the combobox container (padding/empty area), still focus the input
+    // so the keyboard appears on the first tap.
+    combo.addEventListener('pointerdown', (e) => {
+        const target = e.target;
+        if (target === input) return;
+        if (clearBtn && target === clearBtn) return;
+        // Tapping list items should not re-focus (selection handlers handle it)
+        if (target && target.closest && target.closest('#donorComboList')) return;
+
+        focusDonorInputInGesture();
+    });
+
+    // Extra iOS fallback: some iPhones don't deliver pointer events reliably.
+    combo.addEventListener('touchstart', (e) => {
+        const target = e.target;
+        if (target === input) return;
+        if (clearBtn && target === clearBtn) return;
+        if (target && target.closest && target.closest('#donorComboList')) return;
+        focusDonorInputInGesture();
+    }, { passive: true });
+
     // If the list scrolls (or a touchmove happens inside it), ignore any immediate clicks.
     list.addEventListener('scroll', () => {
         donorComboLastTouchMoveAt = Date.now();
