@@ -210,6 +210,66 @@
             width: 100%;
         }
 
+        /* =============================
+           DONOR COMBOBOX (type-to-filter)
+           ============================= */
+        .donor-combobox {
+            position: relative;
+            width: 100%;
+        }
+        .donor-combo-input {
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            background: #fff;
+        }
+        .donor-combo-list {
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            max-height: 260px;
+            overflow: auto;
+            z-index: 50;
+        }
+        .donor-combo-list.open {
+            display: block;
+        }
+        .donor-combo-item {
+            padding: 10px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #2c3e50;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            user-select: none;
+        }
+        .donor-combo-item:last-child {
+            border-bottom: none;
+        }
+        .donor-combo-item.active {
+            background: #9dae55;
+            color: #fff;
+        }
+        .donor-combo-item.muted {
+            color: #6b7b88;
+            cursor: default;
+        }
+        .company-select-hidden {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .add-new-donor-inline {
             display: none;
             align-items: center;
@@ -388,7 +448,7 @@
             padding: 6px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 16px;
             background-color: white;
             color: #333;
             text-align: right;
@@ -598,7 +658,12 @@
             <div class="input-group">
                 <div class="input-field">
                     <div class="company-row">
-                        <select id="companySelect">
+                        <div class="donor-combobox" id="donorCombobox">
+                            <input type="text" id="donorComboInput" class="donor-combo-input" placeholder="Select or search donor..." autocomplete="off" spellcheck="false" aria-label="Select or search donor">
+                            <div id="donorComboList" class="donor-combo-list" role="listbox" aria-label="Donor options"></div>
+                        </div>
+
+                        <select id="companySelect" class="company-select-hidden" aria-hidden="true" tabindex="-1">
                             <option value="">-- Select a Company --</option>
                             <option value="New">Add New Donor...</option>
                         </select>

@@ -40,7 +40,7 @@ function handleSubmitDonation() {
     let companyName = companySelect ? companySelect.value : '';
     if (!companyName) {
         alert('Please select a donor (company) before submitting.');
-        try { companySelect?.focus(); } catch { }
+        try { document.getElementById('donorComboInput')?.focus(); } catch { }
         return;
     }
 
@@ -223,6 +223,16 @@ function updateCompanyDropdown() {
     if (typeof handleCompanyChange === 'function') {
         handleCompanyChange();
     }
+
+    // Keep the combobox UI (if present) in sync with the backing <select>.
+    if (typeof syncDonorComboboxFromSelect === 'function') {
+        syncDonorComboboxFromSelect();
+    }
+
+    // If the list is open, refresh visible items.
+    if (typeof renderDonorComboboxList === 'function') {
+        renderDonorComboboxList();
+    }
 }
 // =============================
 // ADD NEW DONOR LOGIC
@@ -306,6 +316,7 @@ function clearCategory() {
         alert('Please select a category to clear.');
         return;
     }
+    if (!confirm(`Clear the total for "${selectedCategory}"?`)) return;
     categoryTotals[selectedCategory] = 0;
     updateCategoryTotals();
 }
@@ -317,6 +328,7 @@ function restartDonation() {
     }
     updateCategoryTotals();
     lastMeasurement = null;
+    selectedCategory = '';
     // Reset UI fields
     document.getElementById('categoryLabel').textContent = 'Select Category';
     const usageValueElem = document.querySelector('.usage-value');
@@ -330,6 +342,16 @@ function restartDonation() {
     // Optionally reset company and donor fields
     const companySelect = document.getElementById('companySelect');
     if (companySelect) companySelect.value = '';
+    if (typeof syncDonorComboboxFromSelect === 'function') {
+        syncDonorComboboxFromSelect();
+    }
+
+    const tempInput = document.getElementById('temperatureInput');
+    if (tempInput) {
+        tempInput.value = '';
+        tempInput.classList.remove('show');
+    }
+
     const newDonorInput = document.getElementById('newDonorInput');
     if (newDonorInput) newDonorInput.value = '';
     const addNewDonorSection = document.getElementById('addNewDonorSection');
@@ -343,7 +365,7 @@ function logWeight() {
     const companyName = companySelect ? companySelect.value : '';
     if (!companyName || String(companyName).toLowerCase() === 'new') {
         alert('Please select or add a donor (company) before logging weight.');
-        try { companySelect?.focus(); } catch { }
+        try { document.getElementById('donorComboInput')?.focus(); } catch { }
         return;
     }
 
@@ -446,6 +468,213 @@ function handleCompanyChange() {
 
 
 // =============================
+// DONOR COMBOBOX (Home page)
+// =============================
+let donorComboOpen = false;
+let donorComboActiveIndex = -1;
+let donorComboItems = [];
+
+function normalizeDonorLabel(text) {
+    return String(text || '').replace(/^★\s*/, '').trim();
+}
+
+function syncDonorComboboxFromSelect() {
+    const input = document.getElementById('donorComboInput');
+    const select = document.getElementById('companySelect');
+    if (!input || !select) return;
+
+    const value = select.value;
+    if (!value) {
+        input.value = '';
+        return;
+    }
+
+    const opt = [...select.options].find(o => o.value === value);
+    input.value = normalizeDonorLabel(opt ? opt.textContent : value);
+}
+
+function getDonorComboboxOptionItems() {
+    const select = document.getElementById('companySelect');
+    const input = document.getElementById('donorComboInput');
+    if (!select || !input) return [];
+
+    const query = String(input.value || '').trim().toLowerCase();
+    const options = [...select.options]
+        .filter(opt => String(opt.value || '') !== '') // exclude placeholder
+        .filter(opt => {
+            if (String(opt.value || '').toLowerCase() === 'new') return true;
+            if (!query) return true;
+            const label = normalizeDonorLabel(opt.textContent || opt.value);
+            return label.toLowerCase().includes(query);
+        });
+
+    return options.map(opt => {
+        const rawText = String(opt.textContent || opt.value || '');
+        const isFavorite = /^\s*★\s*/.test(rawText);
+        return {
+            value: opt.value,
+            label: normalizeDonorLabel(rawText),
+            isAddNew: String(opt.value || '').toLowerCase() === 'new',
+            isFavorite
+        };
+    });
+}
+
+function openDonorCombobox() {
+    donorComboOpen = true;
+    donorComboActiveIndex = 0;
+    renderDonorComboboxList();
+}
+
+function closeDonorCombobox() {
+    donorComboOpen = false;
+    donorComboActiveIndex = -1;
+    const list = document.getElementById('donorComboList');
+    if (list) list.classList.remove('open');
+}
+
+function setSelectedDonorValue(value) {
+    const select = document.getElementById('companySelect');
+    if (!select) return;
+    select.value = value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    syncDonorComboboxFromSelect();
+}
+
+function renderDonorComboboxList() {
+    const list = document.getElementById('donorComboList');
+    const input = document.getElementById('donorComboInput');
+    if (!list || !input) return;
+
+    if (!donorComboOpen) {
+        list.classList.remove('open');
+        return;
+    }
+
+    donorComboItems = getDonorComboboxOptionItems();
+
+    // Clamp active index
+    if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
+    if (donorComboActiveIndex >= donorComboItems.length) donorComboActiveIndex = donorComboItems.length - 1;
+
+    list.innerHTML = '';
+
+    if (donorComboItems.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'donor-combo-item muted';
+        empty.textContent = 'No matches';
+        list.appendChild(empty);
+        list.classList.add('open');
+        return;
+    }
+
+    donorComboItems.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'donor-combo-item' + (idx === donorComboActiveIndex ? ' active' : '');
+        row.setAttribute('role', 'option');
+        row.setAttribute('aria-selected', idx === donorComboActiveIndex ? 'true' : 'false');
+        row.textContent = item.isAddNew
+            ? 'Add New Donor...'
+            : (item.isFavorite ? `★ ${item.label}` : item.label);
+
+        // Use pointerdown so selection happens before input blur.
+        row.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            setSelectedDonorValue(item.value);
+            closeDonorCombobox();
+        });
+
+        list.appendChild(row);
+    });
+
+    list.classList.add('open');
+}
+
+function initDonorCombobox() {
+    const combo = document.getElementById('donorCombobox');
+    const input = document.getElementById('donorComboInput');
+    const list = document.getElementById('donorComboList');
+    const select = document.getElementById('companySelect');
+    if (!combo || !input || !list || !select) return;
+
+    syncDonorComboboxFromSelect();
+
+    input.addEventListener('focus', () => {
+        openDonorCombobox();
+    });
+
+    input.addEventListener('input', () => {
+        if (!donorComboOpen) donorComboOpen = true;
+        donorComboActiveIndex = 0;
+        renderDonorComboboxList();
+    });
+
+    input.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (key === 'ArrowDown') {
+            e.preventDefault();
+            if (!donorComboOpen) openDonorCombobox();
+            else {
+                donorComboActiveIndex = Math.min(donorComboActiveIndex + 1, donorComboItems.length - 1);
+                renderDonorComboboxList();
+            }
+            return;
+        }
+        if (key === 'ArrowUp') {
+            e.preventDefault();
+            if (!donorComboOpen) openDonorCombobox();
+            else {
+                donorComboActiveIndex = Math.max(donorComboActiveIndex - 1, 0);
+                renderDonorComboboxList();
+            }
+            return;
+        }
+        if (key === 'Escape') {
+            e.preventDefault();
+            closeDonorCombobox();
+            return;
+        }
+        if (key === 'Enter') {
+            e.preventDefault();
+
+            // If the user typed an exact match, select it.
+            const typed = String(input.value || '').trim().toLowerCase();
+            const candidates = getDonorComboboxOptionItems().filter(i => !i.isAddNew);
+            const exact = candidates.find(i => String(i.label || '').toLowerCase() === typed);
+            if (exact) {
+                setSelectedDonorValue(exact.value);
+                closeDonorCombobox();
+                return;
+            }
+
+            if (!donorComboOpen) {
+                openDonorCombobox();
+                return;
+            }
+
+            const chosen = donorComboItems[donorComboActiveIndex];
+            if (chosen) {
+                setSelectedDonorValue(chosen.value);
+                closeDonorCombobox();
+            }
+            return;
+        }
+    });
+
+    // Close when clicking outside
+    document.addEventListener('pointerdown', (e) => {
+        if (combo.contains(e.target)) return;
+        closeDonorCombobox();
+    });
+
+    // When the hidden select changes (e.g., after adding a donor), sync input text
+    select.addEventListener('change', () => {
+        syncDonorComboboxFromSelect();
+    });
+}
+
+
+// =============================
 // INITIALIZATION
 // =============================
 document.addEventListener('DOMContentLoaded', function() {
@@ -468,6 +697,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (select) {
         select.addEventListener('change', handleCompanyChange);
     }
+
+    // Donor combobox (type-to-filter)
+    initDonorCombobox();
     // Log weight button
     const logBtn = document.querySelector('.log-weight-btn');
     if (logBtn) {
