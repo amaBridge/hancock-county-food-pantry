@@ -450,6 +450,32 @@ let donorComboActiveIndex = -1;
 let donorComboItems = [];
 let donorComboQuery = '';
 
+let appToastTimer = null;
+
+function showAppToast(message, { timeoutMs = 2400 } = {}) {
+    const el = document.getElementById('appToast');
+    if (!el) return;
+
+    const text = String(message || '').trim();
+    if (!text) return;
+
+    el.textContent = text;
+    el.classList.remove('show');
+    // Force reflow so repeated messages animate.
+    // eslint-disable-next-line no-unused-expressions
+    el.offsetHeight;
+    el.classList.add('show');
+
+    if (appToastTimer) {
+        clearTimeout(appToastTimer);
+        appToastTimer = null;
+    }
+
+    appToastTimer = setTimeout(() => {
+        try { el.classList.remove('show'); } catch { }
+    }, Math.max(800, Number(timeoutMs) || 2400));
+}
+
 function normalizeDonorLabel(text) {
     return String(text || '').replace(/^★\s*/, '').trim();
 }
@@ -502,13 +528,18 @@ function addOrSelectDonorByName(name) {
 
     const already = donors.find(d => String(d || '').trim().toLowerCase() === typed.toLowerCase());
     const canonical = already ? String(already).trim() : typed;
-    if (!already) {
+    const didCreate = !already;
+    if (didCreate) {
         donors.push(canonical);
         localStorage.setItem('donorList', JSON.stringify(donors));
         updateCompanyDropdown();
     }
 
     setSelectedDonorValue(canonical);
+
+    if (didCreate) {
+        showAppToast(`New donor added: ${canonical}`);
+    }
     return canonical;
 }
 

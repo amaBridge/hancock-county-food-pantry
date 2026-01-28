@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Donation Entry Form</title>
+    <title>New Donation</title>
     <!-- =============================
                      HEAD / STYLES
          ============================== -->
@@ -375,6 +375,41 @@
         }
         .donor-combo-list.open {
             display: block;
+        }
+
+        /* =============================
+           TOAST / CONFIRMATION MESSAGE
+           ============================= */
+        .app-toast {
+            position: fixed;
+            top: 76px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            max-width: calc(100% - 24px);
+            padding: 10px 14px;
+            border-radius: 12px;
+            background: rgba(90, 122, 146, 0.96);
+            color: #fff;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+            opacity: 0;
+            pointer-events: none;
+            z-index: 2500;
+            transition: opacity 160ms ease, transform 160ms ease;
+            font-size: 14px;
+            line-height: 1.25;
+            text-align: center;
+        }
+        .app-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (min-width: 768px) {
+            .app-toast {
+                top: 84px;
+                font-size: 16px;
+                padding: 12px 16px;
+            }
         }
         .donor-combo-item {
             padding: 12px 12px;
@@ -903,7 +938,7 @@
             &#9776;
         </button>
         <div class="nav-links" id="navLinks">
-            <a href="index.html">Home</a>
+            <a href="index.html">New Donation</a>
             <span class="nav-divider"></span>
             <a href="donor-management.html">Donor Management</a>
             <span class="nav-divider"></span>
@@ -913,6 +948,9 @@
 
     <!-- Prevent click-through when donor dropdown is open -->
     <div id="donorComboBackdrop" class="donor-combo-backdrop" aria-hidden="true"></div>
+
+    <!-- Lightweight confirmation toast (e.g., new donor added) -->
+    <div id="appToast" class="app-toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
     <!-- =============================
                      BODY / APP CONTAINER
@@ -925,7 +963,7 @@
              ============================== -->
         <div class="header">
             <div class="header-content">
-                <h1>Donation Entry Form</h1>
+                <h1>Create a New Donation</h1>
                 <p>For Hancock County Food Pantry</p>
             </div>
         </div>
