@@ -363,6 +363,11 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('That donor already exists.');
       return;
     }
+    if (!confirm(`Add new donor "${name}"?`)) {
+      try { input.focus(); } catch { }
+      return;
+    }
+
     donors.push(name);
     setDonors(donors);
     input.value = '';

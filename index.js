@@ -85,7 +85,8 @@ function handleSubmitDonation() {
     if (String(companyName).toLowerCase() === 'new') {
         const typed = String(document.getElementById('donorComboInput')?.value || '').trim();
         if (typed) {
-            addOrSelectDonorByName(typed);
+            const createdOrSelected = addOrSelectDonorByName(typed);
+            if (!createdOrSelected) return;
             companyName = companySelect ? companySelect.value : '';
         }
 
@@ -566,6 +567,13 @@ function addOrSelectDonorByName(name) {
     const canonical = already ? String(already).trim() : typed;
     const didCreate = !already;
     if (didCreate) {
+        const ok = confirm(`Add new donor "${canonical}"?`);
+        if (!ok) {
+            showAppToast('New donor was not added.');
+            try { input?.focus(); } catch { }
+            return '';
+        }
+
         donors.push(canonical);
         localStorage.setItem('donorList', JSON.stringify(donors));
         updateCompanyDropdown();
@@ -711,8 +719,8 @@ function renderDonorComboboxList() {
             armCategoryClickSuppression();
             if (item.isAddNew) {
                 const typed = String(input.value || '').trim();
-                addOrSelectDonorByName(typed);
-                closeDonorCombobox();
+                const createdOrSelected = addOrSelectDonorByName(typed);
+                if (createdOrSelected) closeDonorCombobox();
                 return;
             }
 
@@ -824,8 +832,8 @@ function initDonorCombobox() {
             const chosen = donorComboItems[donorComboActiveIndex];
             if (chosen) {
                 if (chosen.isAddNew) {
-                    addOrSelectDonorByName(String(input.value || '').trim());
-                    closeDonorCombobox();
+                    const createdOrSelected = addOrSelectDonorByName(String(input.value || '').trim());
+                    if (createdOrSelected) closeDonorCombobox();
                     return;
                 }
 
