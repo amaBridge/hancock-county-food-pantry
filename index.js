@@ -497,6 +497,13 @@ let donorComboActiveIndex = -1;
 let donorComboItems = [];
 let donorComboQuery = '';
 
+// Touch/scroll helpers (iOS Safari can emit a click after a scroll gesture)
+let donorComboLastTouchMoveAt = 0;
+let donorComboSuppressClickUntil = 0;
+function donorComboTouchWasMovingRecently(windowMs = 220) {
+    return Date.now() - donorComboLastTouchMoveAt < windowMs;
+}
+
 // When a native modal (confirm/alert) returns focus to the input, it can retrigger
 // our focus handler and reopen the dropdown. Use a short suppression window.
 let donorComboSuppressOpenUntil = 0;
@@ -787,10 +794,9 @@ function renderDonorComboboxList() {
         // On touch devices, users need to be able to scroll the dropdown list.
         // Selecting on pointerdown breaks scrolling (a swipe immediately picks an item).
         const selectThisRow = (e) => {
-            // If the user was scrolling the list, ignore the tap/click.
-            if (typeof wasDonorComboListScrollingRecently === 'function' && wasDonorComboListScrollingRecently()) {
-                return;
-            }
+            // If the user was scrolling, ignore the tap/click.
+            if (donorComboTouchWasMovingRecently(260)) return;
+            if (Date.now() < donorComboSuppressClickUntil) return;
 
             e?.preventDefault?.();
             e?.stopPropagation?.();
@@ -810,8 +816,38 @@ function renderDonorComboboxList() {
             finalizeDonorSelection({ closeDropdown: true, blurInput: true });
         };
 
-        // Use click only; iOS Safari can fire touchend even after a scroll gesture.
+        // Desktop/mouse
         row.addEventListener('click', selectThisRow);
+
+        // Mobile/touch: only select on touchend if the finger didn't move (scroll).
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchMoved = false;
+        row.addEventListener('touchstart', (e) => {
+            const t = e.touches && e.touches[0];
+            if (!t) return;
+            touchStartX = t.clientX;
+            touchStartY = t.clientY;
+            touchMoved = false;
+        }, { passive: true });
+
+        row.addEventListener('touchmove', (e) => {
+            const t = e.touches && e.touches[0];
+            if (!t) return;
+            const dx = Math.abs(t.clientX - touchStartX);
+            const dy = Math.abs(t.clientY - touchStartY);
+            if (dx > 8 || dy > 8) {
+                touchMoved = true;
+                donorComboLastTouchMoveAt = Date.now();
+            }
+        }, { passive: true });
+
+        row.addEventListener('touchend', (e) => {
+            if (touchMoved) return;
+            // Prevent the synthetic click that iOS can fire after touchend.
+            donorComboSuppressClickUntil = Date.now() + 650;
+            selectThisRow(e);
+        }, { passive: false });
 
         list.appendChild(row);
     });
@@ -828,45 +864,13 @@ function initDonorCombobox() {
     const clearBtn = document.getElementById('donorComboClear');
     if (!combo || !input || !list || !select) return;
 
-    // Track touch scrolling within the dropdown list so a swipe doesn't select an item.
-    // iOS Safari in particular can be aggressive about turning scroll swipes into taps.
-    let donorComboListTouchStartX = 0;
-    let donorComboListTouchStartY = 0;
-    let donorComboListTouchMoved = false;
-    let donorComboListLastScrollAt = 0;
-
-    window.wasDonorComboListScrollingRecently = function wasDonorComboListScrollingRecently() {
-        // Longer window helps iOS where scroll momentum continues after finger lift.
-        return donorComboListTouchMoved || (Date.now() - donorComboListLastScrollAt < 900);
-    };
-
+    // If the list scrolls (or a touchmove happens inside it), ignore any immediate clicks.
     list.addEventListener('scroll', () => {
-        donorComboListLastScrollAt = Date.now();
+        donorComboLastTouchMoveAt = Date.now();
     }, { passive: true });
 
-    list.addEventListener('touchstart', (e) => {
-        const t = e.touches && e.touches[0];
-        if (!t) return;
-        donorComboListTouchStartX = t.clientX;
-        donorComboListTouchStartY = t.clientY;
-        donorComboListTouchMoved = false;
-    }, { passive: true });
-
-    list.addEventListener('touchmove', (e) => {
-        const t = e.touches && e.touches[0];
-        if (!t) return;
-        const dx = Math.abs(t.clientX - donorComboListTouchStartX);
-        const dy = Math.abs(t.clientY - donorComboListTouchStartY);
-        if (dx > 10 || dy > 10) {
-            donorComboListTouchMoved = true;
-            donorComboListLastScrollAt = Date.now();
-        }
-    }, { passive: true });
-
-    list.addEventListener('touchend', () => {
-        // Keep the "recently scrolling" guard active briefly after finger lift.
-        if (donorComboListTouchMoved) donorComboListLastScrollAt = Date.now();
-        setTimeout(() => { donorComboListTouchMoved = false; }, 350);
+    list.addEventListener('touchmove', () => {
+        donorComboLastTouchMoveAt = Date.now();
     }, { passive: true });
 
     function updateClearState() {
@@ -1044,7 +1048,7 @@ function initDonorCombobox() {
 document.addEventListener('DOMContentLoaded', function() {
     // Temporary: visible build/version marker for cache debugging.
     // Update this string whenever you need to verify iOS Safari is pulling fresh assets.
-    const APP_VERSION = '2026-01-28';
+    const APP_VERSION = '2026-01-28 18:10';
     const versionEl = document.getElementById('appVersion');
     if (versionEl) versionEl.textContent = `Version: ${APP_VERSION}`;
 
