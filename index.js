@@ -504,6 +504,33 @@ function donorComboTouchWasMovingRecently(windowMs = 220) {
     return Date.now() - donorComboLastTouchMoveAt < windowMs;
 }
 
+function adjustDonorComboboxDropdownPlacement() {
+    const combo = document.getElementById('donorCombobox');
+    const input = document.getElementById('donorComboInput');
+    const list = document.getElementById('donorComboList');
+    if (!combo || !input || !list) return;
+    if (!donorComboOpen) return;
+
+    // Use visualViewport so iOS keyboard reduces the measured height.
+    const vv = window.visualViewport;
+    const viewportHeight = vv && Number.isFinite(vv.height) ? vv.height : window.innerHeight;
+
+    const inputRect = input.getBoundingClientRect();
+    const padding = 12;
+    const spaceBelow = Math.max(0, viewportHeight - inputRect.bottom - padding);
+    const spaceAbove = Math.max(0, inputRect.top - padding);
+
+    const desiredMax = 260;
+    const minUsable = 140;
+    const shouldDropUp = spaceBelow < minUsable && spaceAbove > spaceBelow;
+
+    list.classList.toggle('drop-up', shouldDropUp);
+
+    const available = shouldDropUp ? spaceAbove : spaceBelow;
+    const maxHeight = Math.max(120, Math.min(desiredMax, Math.floor(available)));
+    list.style.maxHeight = `${maxHeight}px`;
+}
+
 // When a native modal (confirm/alert) returns focus to the input, it can retrigger
 // our focus handler and reopen the dropdown. Use a short suppression window.
 let donorComboSuppressOpenUntil = 0;
@@ -718,13 +745,18 @@ function openDonorCombobox() {
     donorComboQuery = '';
     setDonorComboBackdropOpen(true);
     renderDonorComboboxList();
+    adjustDonorComboboxDropdownPlacement();
 }
 
 function closeDonorCombobox({ lingerMs = 800 } = {}) {
     donorComboOpen = false;
     donorComboActiveIndex = -1;
     const list = document.getElementById('donorComboList');
-    if (list) list.classList.remove('open');
+    if (list) {
+        list.classList.remove('open');
+        list.classList.remove('drop-up');
+        list.style.maxHeight = '';
+    }
 
     // Linger briefly to prevent click-through on touch devices.
     setDonorComboBackdropOpen(false, { lingerMs });
@@ -855,6 +887,7 @@ function renderDonorComboboxList() {
     });
 
     list.classList.add('open');
+    adjustDonorComboboxDropdownPlacement();
 }
 
 function initDonorCombobox() {
@@ -934,6 +967,7 @@ function initDonorCombobox() {
     input.addEventListener('pointerdown', () => {
         if (Date.now() < donorComboSuppressOpenUntil) return;
         if (!donorComboOpen) openDonorCombobox();
+        else adjustDonorComboboxDropdownPlacement();
     });
 
     input.addEventListener('input', () => {
@@ -943,7 +977,15 @@ function initDonorCombobox() {
         donorComboActiveIndex = 0;
         renderDonorComboboxList();
         updateClearState();
+        adjustDonorComboboxDropdownPlacement();
     });
+
+    // Keyboard-aware resizing (iOS Safari)
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', adjustDonorComboboxDropdownPlacement);
+        window.visualViewport.addEventListener('scroll', adjustDonorComboboxDropdownPlacement);
+    }
+    window.addEventListener('resize', adjustDonorComboboxDropdownPlacement);
 
     // Mobile keyboards sometimes don't emit a reliable keydown for Enter/Done.
     // beforeinput fires with insertLineBreak/insertParagraph on many browsers.

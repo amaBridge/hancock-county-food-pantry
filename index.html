@@ -362,6 +362,12 @@
             z-index: 70;
         }
 
+        /* When space below is limited (keyboard), open upward instead */
+        .donor-combo-list.drop-up {
+            top: auto;
+            bottom: calc(100% + 6px);
+        }
+
         /* Backdrop to prevent taps/clicks landing on elements under the open dropdown */
         .donor-combo-backdrop {
             display: none;
