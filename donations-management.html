@@ -128,7 +128,10 @@
             padding: 12px;
             border-radius: 6px;
             margin: 10px;
-            /* Keep wide tables inside the rounded section border */
+            max-width: 100%;
+        }
+        /* Keep wide tables inside the rounded section border without making the toolbar scrollable */
+        .table-scroll {
             overflow-x: auto;
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
@@ -249,13 +252,13 @@
                         font-size: 16px !important;
                     }
 
-          .table-section {
-            width: auto; /* Adjust to fit the table's width */
-            overflow-x: auto; /* Enable horizontal scrolling if necessary */
-          }
-          table {
-            min-width: 600px; /* Ensure the table has a minimum width */
-          }
+                    .table-scroll {
+                        width: auto; /* Adjust to fit the table's width */
+                        overflow-x: auto; /* Enable horizontal scrolling if necessary */
+                    }
+                    table {
+                        min-width: 600px; /* Ensure the table has a minimum width */
+                    }
         }
 
                 /* Touch devices (incl. iPad): prevent focus-zoom even on wider viewports */
@@ -419,23 +422,25 @@
                     <button id="orderToggleBtn" class="toolbar-btn secondary" type="button">Order: Descending</button>
                 </div>
             </div>
-            <table id="donationsTable">
-                <thead>
-                    <tr>
-                        <th>Date / Time</th>
-                        <th>Company</th>
-                        <th>Produce (lb)</th>
-                        <th>Frozen Meats (lb)</th>
-                        <th>Temperature (°F)</th>
-                        <th>Misc Frozen (lb)</th>
-                        <th>Bakery (lb)</th>
-                        <th>Dry (lb)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div class="table-scroll">
+                <table id="donationsTable">
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>Company</th>
+                            <th>Produce (lb)</th>
+                            <th>Frozen Meats (lb)</th>
+                            <th>Temperature (°F)</th>
+                            <th>Misc Frozen (lb)</th>
+                            <th>Bakery (lb)</th>
+                            <th>Dry (lb)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
