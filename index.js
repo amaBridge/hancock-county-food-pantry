@@ -682,7 +682,8 @@ function getDonorComboboxOptionItems() {
 
 function openDonorCombobox() {
     donorComboOpen = true;
-    donorComboActiveIndex = 0;
+    // Start with no highlighted row; hover/keyboard will set it.
+    donorComboActiveIndex = -1;
     // Default to showing the full list when opening.
     donorComboQuery = '';
     setDonorComboBackdropOpen(true);
@@ -721,7 +722,7 @@ function renderDonorComboboxList() {
     donorComboItems = getDonorComboboxOptionItems();
 
     // Clamp active index
-    if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
+    if (donorComboActiveIndex < -1) donorComboActiveIndex = -1;
     if (donorComboActiveIndex >= donorComboItems.length) donorComboActiveIndex = donorComboItems.length - 1;
 
     list.innerHTML = '';
@@ -744,6 +745,21 @@ function renderDonorComboboxList() {
         row.textContent = item.isAddNew
             ? (typedLabel ? `Add New Donor: "${typedLabel}"` : 'Add New Donor...')
             : (item.isFavorite ? `★ ${item.label}` : item.label);
+
+        // Hover behavior: move the green highlight to the row under the mouse.
+        row.addEventListener('pointerenter', () => {
+            if (!donorComboOpen) return;
+            if (donorComboActiveIndex === idx) return;
+            donorComboActiveIndex = idx;
+            // Update highlight in-place (no full rerender needed)
+            const children = list.children;
+            for (let i = 0; i < children.length; i++) {
+                const el = children[i];
+                const isActive = i === donorComboActiveIndex;
+                el.classList.toggle('active', isActive);
+                el.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            }
+        });
 
         // Use pointerdown so selection happens before input blur.
         row.addEventListener('pointerdown', (e) => {
@@ -790,6 +806,13 @@ function initDonorCombobox() {
         openDonorCombobox();
     });
 
+    // If the input never lost focus (e.g., user clicked on a non-focusable area),
+    // focusing won't fire again. Allow click/tap to reopen the dropdown.
+    input.addEventListener('pointerdown', () => {
+        if (Date.now() < donorComboSuppressOpenUntil) return;
+        if (!donorComboOpen) openDonorCombobox();
+    });
+
     input.addEventListener('input', () => {
         // When the user types, that becomes the active filter query.
         donorComboQuery = String(input.value || '');
@@ -826,7 +849,8 @@ function initDonorCombobox() {
             e.preventDefault();
             if (!donorComboOpen) openDonorCombobox();
             else {
-                donorComboActiveIndex = Math.min(donorComboActiveIndex + 1, donorComboItems.length - 1);
+                if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
+                else donorComboActiveIndex = Math.min(donorComboActiveIndex + 1, donorComboItems.length - 1);
                 renderDonorComboboxList();
             }
             return;
@@ -835,7 +859,8 @@ function initDonorCombobox() {
             e.preventDefault();
             if (!donorComboOpen) openDonorCombobox();
             else {
-                donorComboActiveIndex = Math.max(donorComboActiveIndex - 1, 0);
+                if (donorComboActiveIndex < 0) donorComboActiveIndex = Math.max(donorComboItems.length - 1, 0);
+                else donorComboActiveIndex = Math.max(donorComboActiveIndex - 1, 0);
                 renderDonorComboboxList();
             }
             return;
@@ -862,6 +887,9 @@ function initDonorCombobox() {
                 openDonorCombobox();
                 return;
             }
+
+            // If nothing is highlighted, default to the first item on Enter.
+            if (donorComboActiveIndex < 0) donorComboActiveIndex = 0;
 
             const chosen = donorComboItems[donorComboActiveIndex];
             if (chosen) {
