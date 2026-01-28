@@ -422,6 +422,14 @@
             user-select: none;
             touch-action: manipulation;
         }
+
+        /* Temporary: visible build/version marker for cache debugging */
+        .app-version {
+            margin-top: 6px;
+            font-size: 12px;
+            color: rgba(90, 122, 146, 0.9);
+            letter-spacing: 0.2px;
+        }
         .donor-combo-item:last-child {
             border-bottom: none;
         }
@@ -970,6 +978,7 @@
             <div class="header-content">
                 <h1>Create a New Donation</h1>
                 <p>For Hancock County Food Pantry</p>
+                <div class="app-version" id="appVersion">Version: 2026-01-28</div>
             </div>
         </div>
         
@@ -1076,6 +1085,6 @@
     <!-- =============================
                      SCRIPTS
          ============================== -->
-    <script src="index.js" defer></script>
+    <script src="index.js?v=2026-01-28" defer></script>
 </body>
 </html>

@@ -1042,6 +1042,12 @@ function initDonorCombobox() {
 // INITIALIZATION
 // =============================
 document.addEventListener('DOMContentLoaded', function() {
+    // Temporary: visible build/version marker for cache debugging.
+    // Update this string whenever you need to verify iOS Safari is pulling fresh assets.
+    const APP_VERSION = '2026-01-28';
+    const versionEl = document.getElementById('appVersion');
+    if (versionEl) versionEl.textContent = `Version: ${APP_VERSION}`;
+
     initNavbarMenu();
 
     updateCompanyDropdown();
