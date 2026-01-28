@@ -473,6 +473,7 @@ function handleCompanyChange() {
 let donorComboOpen = false;
 let donorComboActiveIndex = -1;
 let donorComboItems = [];
+let donorComboQuery = '';
 
 function normalizeDonorLabel(text) {
     return String(text || '').replace(/^★\s*/, '').trim();
@@ -486,6 +487,7 @@ function syncDonorComboboxFromSelect() {
     const value = select.value;
     if (!value) {
         input.value = '';
+        donorComboQuery = '';
         return;
     }
 
@@ -493,11 +495,13 @@ function syncDonorComboboxFromSelect() {
     // doesn't filter the list down to only that entry (which looks like donors disappeared).
     if (String(value).toLowerCase() === 'new') {
         input.value = '';
+        donorComboQuery = '';
         return;
     }
 
     const opt = [...select.options].find(o => o.value === value);
     input.value = normalizeDonorLabel(opt ? opt.textContent : value);
+    donorComboQuery = '';
 }
 
 function getDonorComboboxOptionItems() {
@@ -505,7 +509,7 @@ function getDonorComboboxOptionItems() {
     const input = document.getElementById('donorComboInput');
     if (!select || !input) return [];
 
-    const query = String(input.value || '').trim().toLowerCase();
+    const query = String(donorComboQuery || '').trim().toLowerCase();
     const options = [...select.options]
         .filter(opt => String(opt.value || '') !== '') // exclude placeholder
         .filter(opt => {
@@ -530,6 +534,8 @@ function getDonorComboboxOptionItems() {
 function openDonorCombobox() {
     donorComboOpen = true;
     donorComboActiveIndex = 0;
+    // Default to showing the full list when opening.
+    donorComboQuery = '';
     renderDonorComboboxList();
 }
 
@@ -545,6 +551,7 @@ function setSelectedDonorValue(value) {
     if (!select) return;
     select.value = value;
     select.dispatchEvent(new Event('change', { bubbles: true }));
+    donorComboQuery = '';
     syncDonorComboboxFromSelect();
 }
 
@@ -611,6 +618,8 @@ function initDonorCombobox() {
     });
 
     input.addEventListener('input', () => {
+        // When the user types, that becomes the active filter query.
+        donorComboQuery = String(input.value || '');
         if (!donorComboOpen) donorComboOpen = true;
         donorComboActiveIndex = 0;
         renderDonorComboboxList();
