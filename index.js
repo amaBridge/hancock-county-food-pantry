@@ -314,6 +314,10 @@ function restartDonation() {
     updateCategoryTotals();
     lastMeasurement = null;
     selectedCategory = '';
+
+    // Clear any selected category button UI state
+    document.querySelectorAll('.category-btn.active').forEach(btn => btn.classList.remove('active'));
+
     // Reset UI fields
     document.getElementById('categoryLabel').textContent = 'Select Category';
     const usageValueElem = document.querySelector('.usage-value');
