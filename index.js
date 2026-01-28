@@ -489,6 +489,13 @@ function syncDonorComboboxFromSelect() {
         return;
     }
 
+    // If the user selected "Add New Donor...", keep the combobox input empty so it
+    // doesn't filter the list down to only that entry (which looks like donors disappeared).
+    if (String(value).toLowerCase() === 'new') {
+        input.value = '';
+        return;
+    }
+
     const opt = [...select.options].find(o => o.value === value);
     input.value = normalizeDonorLabel(opt ? opt.textContent : value);
 }
