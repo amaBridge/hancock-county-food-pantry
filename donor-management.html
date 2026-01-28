@@ -181,7 +181,12 @@
       }
     }
     /* ---- Layout / Container ---- */
-    .container { max-width: 600px; margin: 12px auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .container { width: calc(100% - 24px); max-width: 600px; margin: 12px auto; background-color: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* iPad/tablet: let the app fill the screen more */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      .container { max-width: 1000px; }
+    }
     .header { background-color: #fff; padding: 12px; display: flex; align-items: center; gap: 12px; }
     .logo { width: 16%; height: auto; max-height: 48px; object-fit: contain; }
     .header-content { text-align: left; }

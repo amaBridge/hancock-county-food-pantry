@@ -198,12 +198,20 @@
         }
         
         .container {
+            width: calc(100% - 24px);
             max-width: 600px;
             margin: 12px auto;
             background-color: white;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* iPad/tablet: let the app fill the screen more */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .container {
+                max-width: 1000px;
+            }
         }
         
           /* =============================
