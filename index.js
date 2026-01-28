@@ -784,13 +784,21 @@ function renderDonorComboboxList() {
             }
         });
 
-        // Use pointerdown so selection happens before input blur.
-        row.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        // On touch devices, users need to be able to scroll the dropdown list.
+        // Selecting on pointerdown breaks scrolling (a swipe immediately picks an item).
+        const selectThisRow = (e) => {
+            // If the user was scrolling the list, ignore the tap/click.
+            if (typeof wasDonorComboListScrollingRecently === 'function' && wasDonorComboListScrollingRecently()) {
+                return;
+            }
+
+            e?.preventDefault?.();
+            e?.stopPropagation?.();
+
             // Short suppression window to avoid ghost clicks without making the
             // next intentional tap feel "dead".
             armCategoryClickSuppression(200);
+
             if (item.isAddNew) {
                 const typed = String(input.value || '').trim();
                 const createdOrSelected = addOrSelectDonorByName(typed);
@@ -800,7 +808,10 @@ function renderDonorComboboxList() {
 
             setSelectedDonorValue(item.value);
             finalizeDonorSelection({ closeDropdown: true, blurInput: true });
-        });
+        };
+
+        row.addEventListener('click', selectThisRow);
+        row.addEventListener('touchend', selectThisRow, { passive: false });
 
         list.appendChild(row);
     });
@@ -816,6 +827,34 @@ function initDonorCombobox() {
     const backdrop = document.getElementById('donorComboBackdrop');
     const clearBtn = document.getElementById('donorComboClear');
     if (!combo || !input || !list || !select) return;
+
+    // Track touch scrolling within the dropdown list so a swipe doesn't select an item.
+    let donorComboListTouchStartX = 0;
+    let donorComboListTouchStartY = 0;
+    let donorComboListLastScrollAt = 0;
+
+    window.wasDonorComboListScrollingRecently = function wasDonorComboListScrollingRecently() {
+        return Date.now() - donorComboListLastScrollAt < 250;
+    };
+
+    list.addEventListener('scroll', () => {
+        donorComboListLastScrollAt = Date.now();
+    }, { passive: true });
+
+    list.addEventListener('touchstart', (e) => {
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        donorComboListTouchStartX = t.clientX;
+        donorComboListTouchStartY = t.clientY;
+    }, { passive: true });
+
+    list.addEventListener('touchmove', (e) => {
+        const t = e.touches && e.touches[0];
+        if (!t) return;
+        const dx = Math.abs(t.clientX - donorComboListTouchStartX);
+        const dy = Math.abs(t.clientY - donorComboListTouchStartY);
+        if (dx > 8 || dy > 8) donorComboListLastScrollAt = Date.now();
+    }, { passive: true });
 
     function updateClearState() {
         const hasValue = Boolean(String(input.value || '').trim()) && String(select.value || '').toLowerCase() !== 'new';
