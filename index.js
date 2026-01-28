@@ -6,7 +6,7 @@
 // Quick navigation
 // - Donation submit / receipt: handleSubmitDonation()
 // - Company dropdown sync:     updateCompanyDropdown()
-// - Add-new-donor UI:          applyNewDonor(), handleCompanyChange()
+// - Donor add/select (typed):  addOrSelectDonorByName(), handleCompanyChange()
 // - Category + weight logging: selectCategory(), logWeight(), totals
 // - Startup wiring:            DOMContentLoaded handler at bottom
 // ============================================================
@@ -81,19 +81,17 @@ function handleSubmitDonation() {
         return;
     }
 
-    // If user chose "Add New Donor...", require them to actually add/select a donor first.
+    // "Add New Donor..." is now handled via the combobox typed text.
     if (String(companyName).toLowerCase() === 'new') {
-        const newDonorInput = document.getElementById('newDonorInput');
-        const typed = String(newDonorInput?.value || '').trim();
+        const typed = String(document.getElementById('donorComboInput')?.value || '').trim();
         if (typed) {
-            // Try to add and select it, then continue.
-            applyNewDonor();
+            addOrSelectDonorByName(typed);
             companyName = companySelect ? companySelect.value : '';
         }
 
         if (!companyName || String(companyName).toLowerCase() === 'new') {
-            alert('Please add a new donor name and tap Add before submitting.');
-            try { newDonorInput?.focus(); } catch { }
+            alert('Please type/select a donor before submitting.');
+            try { document.getElementById('donorComboInput')?.focus(); } catch { }
             return;
         }
     }
@@ -272,63 +270,6 @@ function updateCompanyDropdown() {
     }
 }
 // =============================
-// ADD NEW DONOR LOGIC
-// =============================
-function applyNewDonor() {
-    // Adds a new donor directly from the Home page UI (if present).
-    const newDonorInput = document.getElementById('newDonorInput');
-    const companySelect = document.getElementById('companySelect');
-    if (!newDonorInput || !companySelect) return;
-    const newDonor = newDonorInput.value.trim();
-    if (!newDonor) {
-        alert('Please enter a donor name.');
-        return;
-    }
-
-    // Load donors from storage (and normalize legacy formats)
-    let donors = [];
-    try {
-        const raw = JSON.parse(localStorage.getItem('donorList')) || [];
-        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
-            donors = raw
-                .map(d => (typeof d?.name === 'string' ? d.name : ''))
-                .filter(Boolean);
-        } else {
-            donors = Array.isArray(raw) ? raw : [];
-        }
-    } catch {
-        donors = [];
-    }
-
-    // Check for duplicates (case-insensitive)
-    if (donors.some(d => String(d).toLowerCase() === newDonor.toLowerCase())) {
-        alert('That donor already exists in the list.');
-        const existing = donors.find(d => String(d).toLowerCase() === newDonor.toLowerCase()) || '';
-        if (existing) {
-            if (typeof setSelectedDonorValue === 'function') setSelectedDonorValue(existing);
-            else companySelect.value = existing;
-        }
-        newDonorInput.value = '';
-        if (typeof closeDonorCombobox === 'function') closeDonorCombobox();
-        if (typeof handleCompanyChange === 'function') handleCompanyChange();
-        return;
-    }
-
-    donors.push(newDonor);
-    localStorage.setItem('donorList', JSON.stringify(donors));
-
-    // Rebuild dropdown from storage (keeps ordering consistent with donor-management sort mode)
-    updateCompanyDropdown();
-    if (typeof setSelectedDonorValue === 'function') setSelectedDonorValue(newDonor);
-    else companySelect.value = newDonor;
-
-    // Clear + hide the inline UI
-    newDonorInput.value = '';
-    if (typeof closeDonorCombobox === 'function') closeDonorCombobox();
-    if (typeof handleCompanyChange === 'function') handleCompanyChange();
-}
-
-// =============================
 // STATE VARIABLES
 // =============================
 let selectedCategory = '';
@@ -396,10 +337,7 @@ function restartDonation() {
         tempInput.classList.remove('show');
     }
 
-    const newDonorInput = document.getElementById('newDonorInput');
-    if (newDonorInput) newDonorInput.value = '';
-    const addNewDonorSection = document.getElementById('addNewDonorSection');
-    if (addNewDonorSection) addNewDonorSection.style.display = 'none';
+    // (Old inline add-donor UI removed)
 }
 
 function logWeight() {
@@ -496,18 +434,11 @@ function selectCategory(button) {
 
 function handleCompanyChange() {
     const select = document.getElementById('companySelect');
-    const addNewDonorSection = document.getElementById('addNewDonorSection');
-    if (select && addNewDonorSection) {
-        const row = select.closest('.company-row');
-        if (row) row.classList.toggle('is-adding', select.value === 'New');
-        if (select.value === 'New') {
-            addNewDonorSection.style.display = 'flex';
-            const newDonorInput = document.getElementById('newDonorInput');
-            if (newDonorInput) newDonorInput.focus();
-        } else {
-            addNewDonorSection.style.display = 'none';
-        }
-    }
+    if (!select) return;
+
+    // Inline add-donor UI has been removed; keep the layout class in a safe state.
+    const row = select.closest('.company-row');
+    if (row) row.classList.remove('is-adding');
 }
 
 
@@ -521,6 +452,64 @@ let donorComboQuery = '';
 
 function normalizeDonorLabel(text) {
     return String(text || '').replace(/^★\s*/, '').trim();
+}
+
+function findExistingDonorValueByName(name) {
+    const select = document.getElementById('companySelect');
+    const needle = String(name || '').trim().toLowerCase();
+    if (!select || !needle) return '';
+
+    const opts = [...select.options].filter(o => String(o.value || '') !== '' && String(o.value || '').toLowerCase() !== 'new');
+    const match = opts.find(o => {
+        const label = normalizeDonorLabel(o.textContent || o.value);
+        return String(label || '').trim().toLowerCase() === needle;
+    });
+    return match ? String(match.value || '') : '';
+}
+
+function addOrSelectDonorByName(name) {
+    const select = document.getElementById('companySelect');
+    const input = document.getElementById('donorComboInput');
+    const typed = String(name || '').trim();
+    if (!select) return '';
+    if (!typed) {
+        alert('Type a donor name first.');
+        try { input?.focus(); } catch { }
+        return '';
+    }
+
+    // If it already exists, just select it.
+    const existingValue = findExistingDonorValueByName(typed);
+    if (existingValue) {
+        setSelectedDonorValue(existingValue);
+        return existingValue;
+    }
+
+    // Otherwise add it to storage (case-insensitive de-dupe).
+    let donors = [];
+    try {
+        const raw = JSON.parse(localStorage.getItem('donorList')) || [];
+        if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === 'object' && raw[0] !== null) {
+            donors = raw
+                .map(d => (typeof d?.name === 'string' ? d.name : ''))
+                .filter(Boolean);
+        } else {
+            donors = Array.isArray(raw) ? raw : [];
+        }
+    } catch {
+        donors = [];
+    }
+
+    const already = donors.find(d => String(d || '').trim().toLowerCase() === typed.toLowerCase());
+    const canonical = already ? String(already).trim() : typed;
+    if (!already) {
+        donors.push(canonical);
+        localStorage.setItem('donorList', JSON.stringify(donors));
+        updateCompanyDropdown();
+    }
+
+    setSelectedDonorValue(canonical);
+    return canonical;
 }
 
 function syncDonorComboboxFromSelect() {
@@ -653,6 +642,13 @@ function renderDonorComboboxList() {
             e.preventDefault();
             e.stopPropagation();
             armCategoryClickSuppression();
+            if (item.isAddNew) {
+                const typed = String(input.value || '').trim();
+                addOrSelectDonorByName(typed);
+                closeDonorCombobox();
+                return;
+            }
+
             setSelectedDonorValue(item.value);
             closeDonorCombobox();
         });
@@ -760,6 +756,12 @@ function initDonorCombobox() {
 
             const chosen = donorComboItems[donorComboActiveIndex];
             if (chosen) {
+                if (chosen.isAddNew) {
+                    addOrSelectDonorByName(String(input.value || '').trim());
+                    closeDonorCombobox();
+                    return;
+                }
+
                 setSelectedDonorValue(chosen.value);
                 closeDonorCombobox();
             }
@@ -846,23 +848,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearBtn) clearBtn.addEventListener('click', clearCategory);
     const restartBtns = document.querySelectorAll('.btn-submit');
     if (restartBtns.length > 1) restartBtns[1].addEventListener('click', restartDonation);
-
-    // Apply new donor button
-    const applyDonorBtn = document.getElementById('applyDonorBtn');
-    if (applyDonorBtn) {
-        applyDonorBtn.addEventListener('click', applyNewDonor);
-    }
-
-    // Allow pressing Enter in the inline donor input
-    const newDonorInput = document.getElementById('newDonorInput');
-    if (newDonorInput) {
-        newDonorInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                applyNewDonor();
-            }
-        });
-    }
 
     // Submit donation button
     const submitDonationBtn = document.querySelector('.submit-donation-btn');
