@@ -909,26 +909,31 @@ function initDonorCombobox() {
         }
     }
 
+    function openAndFocusFromGesture(e) {
+        const target = e?.target;
+        // Ignore taps on list items (they have their own selection handlers)
+        if (target && target.closest && target.closest('#donorComboList')) return;
+        if (clearBtn && target === clearBtn) return;
+
+        focusDonorInputInGesture();
+
+        // Open the dropdown immediately (still inside the gesture).
+        if (Date.now() >= donorComboSuppressOpenUntil) {
+            if (!donorComboOpen) openDonorCombobox();
+            else adjustDonorComboboxDropdownPlacement();
+        }
+
+        // Some iOS versions will only show the keyboard if focus is called on touchend.
+        // Calling it again is harmless elsewhere.
+        try { input.focus({ preventScroll: true }); } catch { try { input.focus(); } catch { } }
+    }
+
     // If the user taps the combobox container (padding/empty area), still focus the input
     // so the keyboard appears on the first tap.
-    combo.addEventListener('pointerdown', (e) => {
-        const target = e.target;
-        if (target === input) return;
-        if (clearBtn && target === clearBtn) return;
-        // Tapping list items should not re-focus (selection handlers handle it)
-        if (target && target.closest && target.closest('#donorComboList')) return;
-
-        focusDonorInputInGesture();
-    });
-
-    // Extra iOS fallback: some iPhones don't deliver pointer events reliably.
-    combo.addEventListener('touchstart', (e) => {
-        const target = e.target;
-        if (target === input) return;
-        if (clearBtn && target === clearBtn) return;
-        if (target && target.closest && target.closest('#donorComboList')) return;
-        focusDonorInputInGesture();
-    }, { passive: true });
+    combo.addEventListener('pointerdown', openAndFocusFromGesture);
+    // iOS Safari: focus must often occur on touchend to open the keyboard.
+    combo.addEventListener('touchend', openAndFocusFromGesture, { passive: true });
+    combo.addEventListener('click', openAndFocusFromGesture);
 
     // If the list scrolls (or a touchmove happens inside it), ignore any immediate clicks.
     list.addEventListener('scroll', () => {
