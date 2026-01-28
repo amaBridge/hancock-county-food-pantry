@@ -63,8 +63,14 @@
     }
 
     .logo { display: block; margin: 0 auto 14px auto; max-width: 120px; }
-    h1 { text-align: center; font-size: 1.6em; margin-bottom: 0.2em; letter-spacing: 1px; }
-    .subtitle { text-align: center; font-size: 1em; margin-bottom: 1.1em; color: #222; }
+    h1 { text-align: center; font-size: 1.9em; margin-bottom: 0.2em; letter-spacing: 1px; }
+    .subtitle { text-align: center; font-size: 1.15em; margin-bottom: 1.1em; color: #222; }
+
+    /* Tablets: make receipt header a bit larger without changing phone sizes */
+    @media (min-width: 768px) and (max-width: 1024px) {
+      h1 { font-size: 2.2em; }
+      .subtitle { font-size: 1.3em; }
+    }
 
     .info-table { width: 100%; margin-bottom: 1.1em; border-collapse: collapse; }
     .info-table td { padding: 4px 0; font-size: 1em; }

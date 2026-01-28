@@ -169,6 +169,14 @@
             .container {
                 max-width: 1000px;
             }
+
+            /* Bigger header typography on tablets */
+            .header-content h1 {
+                font-size: 40px;
+            }
+            .header-content p {
+                font-size: 18px;
+            }
         }
 
         /* Desktop: let the app fill the screen more */
@@ -204,14 +212,14 @@
         }
         
         .header-content h1 {
-            font-size: 28px;
+            font-size: 34px;
             color: #9dae55;
             margin-bottom: 10px;
         }
         
         .header-content p {
             color: #5a7a92;
-            font-size: 14px;
+            font-size: 16px;
         }
         
           /* =============================
@@ -615,8 +623,9 @@
             background-color: #e0e0e0;
             padding: 14px;
             display: grid;
-            /* Keep totals in one horizontal row; allow columns to shrink */
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+            /* Center totals and allow them to wrap nicely */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            justify-content: center;
             gap: 12px;
             margin: 10px;
             border-radius: 6px;
@@ -636,7 +645,7 @@
             text-align: center;
             color: #00E676;
             font-family: 'Courier New', monospace;
-            min-width: 0;
+            min-width: 180px;
         }
 
         .output-value {
@@ -696,6 +705,17 @@
             display: none;
           }
 
+                                        /* Keep action buttons from wrapping too early by tightening spacing first. */
+                                        .buttons-section {
+                                                padding: 12px;
+                                                gap: 10px;
+                                        }
+                                        .btn {
+                                                min-width: 170px;
+                                                padding: 10px 12px;
+                                                font-size: 15px;
+                                        }
+
                     /* Prevent iOS Safari auto-zoom on focus (inputs <16px trigger zoom) */
                     input:not(.usage-value),
                     select,
@@ -725,6 +745,19 @@
                         width: 100%;
                     }
 
+        }
+
+        @media (max-width: 640px) {
+            /* One more step down before wrapping becomes unavoidable. */
+            .buttons-section {
+                padding: 10px;
+                gap: 8px;
+            }
+            .btn {
+                min-width: 150px;
+                padding: 9px 10px;
+                font-size: 14px;
+            }
         }
 
                 /* Touch devices (incl. iPad): prevent focus-zoom even on wider viewports */
