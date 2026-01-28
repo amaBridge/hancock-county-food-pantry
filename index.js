@@ -14,6 +14,17 @@
 // =============================
 // DONATION SUBMIT LOGIC
 // =============================
+// Mobile Safari sometimes sends a "ghost click" after interacting with
+// a <select> or an overlay list. If the UI closes under the finger, that
+// click can land on an element underneath (e.g., a category button).
+let suppressCategoryClicksUntil = 0;
+function armCategoryClickSuppression(durationMs = 450) {
+    suppressCategoryClicksUntil = Math.max(suppressCategoryClicksUntil, Date.now() + durationMs);
+}
+function shouldSuppressCategoryClicksNow() {
+    return Date.now() < suppressCategoryClicksUntil;
+}
+
 function openReceiptPage(donation, { autoPrint = true } = {}) {
     // Writes the donation into localStorage under a short-lived key and opens receipt.html.
     // This is more reliable on iPad than trying to auto-print from injected HTML.
@@ -601,6 +612,8 @@ function renderDonorComboboxList() {
         // Use pointerdown so selection happens before input blur.
         row.addEventListener('pointerdown', (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            armCategoryClickSuppression();
             setSelectedDonorValue(item.value);
             closeDonorCombobox();
         });
@@ -719,7 +732,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const select = document.getElementById('companySelect');
     if (select) {
         select.addEventListener('change', handleCompanyChange);
+
+        // Guard against ghost-clicks after native select interactions.
+        select.addEventListener('change', () => armCategoryClickSuppression());
+        select.addEventListener('pointerdown', () => armCategoryClickSuppression());
     }
+
+    // Capture-phase suppression so inline onclick handlers never fire.
+    document.addEventListener('click', (e) => {
+        if (!shouldSuppressCategoryClicksNow()) return;
+        const targetBtn = e.target && e.target.closest ? e.target.closest('.category-btn') : null;
+        if (!targetBtn) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+    }, true);
 
     // Donor combobox (type-to-filter)
     initDonorCombobox();
