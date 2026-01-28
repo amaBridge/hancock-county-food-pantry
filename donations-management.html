@@ -32,6 +32,7 @@
                     box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
                     border-bottom: 2px solid #9dae55;
                     position: relative;
+                    z-index: 1000;
                 }
                 .nav-logo {
                     display: flex;
@@ -122,7 +123,17 @@
         .header-content h1 { font-size: 34px; color: #9dae55; margin-bottom: 10px; }
         .header-content p { color: #5a7a92; font-size: 16px; }
         /* ---- Donations Table ---- */
-        .table-section { background-color: #7095bd; padding: 12px; border-radius: 6px; margin: 10px; }
+        .table-section {
+            background-color: #7095bd;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px;
+            /* Keep wide tables inside the rounded section border */
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
         .table-section h2 { font-size: 16px; color: white; margin-bottom: 10px; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; }
         th, td { padding: 6px 8px; text-align: center; }
