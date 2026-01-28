@@ -6,28 +6,6 @@
        - BODY / APP CONTAINER
        - SCRIPTS
 ============================================================ -->
-
-<!-- =============================
-                 TOP NAVIGATION PANE
-        ============================== -->
-<nav class="navbar">
-    <a class="nav-logo" href="index.html">
-        <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
-    </a>
-    <button class="nav-toggle" type="button" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation menu">
-        &#9776;
-    </button>
-    <div class="nav-links" id="navLinks">
-        <a href="index.html">Home</a>
-        <span class="nav-divider"></span>
-        <a href="donor-management.html">Donor Management</a>
-        <span class="nav-divider"></span>
-        <a href="donations-management.html">Donations Management</a>
-    </div>
-</nav>
-<!-- =============================
-         DOCUMENT START
-    ============================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,9 +53,9 @@
             color: #fff;
             text-decoration: none;
             font-weight: 500;
-            font-size: 1.08em;
-            padding: 6px 18px;
-            border-radius: 4px;
+            font-size: 1.12em;
+            padding: 12px 20px;
+            border-radius: 10px;
             transition: background 0.2s, color 0.2s, box-shadow 0.2s;
             font-family: 'Segoe UI', Arial, sans-serif;
         }
@@ -93,9 +71,9 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.28);
             color: #fff;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 22px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 28px;
             line-height: 1;
             cursor: pointer;
         }
@@ -195,6 +173,7 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f5f5f5;
+            font-size: 18px;
         }
         
         .container {
@@ -211,6 +190,13 @@
         @media (min-width: 768px) and (max-width: 1024px) {
             .container {
                 max-width: 1000px;
+            }
+        }
+
+        /* Desktop: let the app fill the screen more */
+        @media (min-width: 1025px) {
+            .container {
+                max-width: 1200px;
             }
         }
         
@@ -259,14 +245,14 @@
                   /* Uses .form-section, .input-group, .input-field, .input-field label, .input-field input */
         .form-section {
             background-color: #7095bd;
-            padding: 12px;
+            padding: 14px;
             border-bottom: 1px solid #e0e0e0;
             margin: 0 10px 10px 10px;
             border-radius: 6px;
         }
         
         .form-section h2 {
-            font-size: 16px;
+            font-size: 18px;
             color: white;
             margin-bottom: 10px;
             font-weight: bold;
@@ -293,10 +279,11 @@
         
         .input-field input,
         .input-field select {
-            padding: 6px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            min-height: 48px;
         }
 
         /* =============================
@@ -328,10 +315,11 @@
             width: 100%;
         }
         .donor-combo-input {
-            padding: 6px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            min-height: 48px;
             width: 100%;
             background: #fff;
         }
@@ -353,9 +341,9 @@
             display: block;
         }
         .donor-combo-item {
-            padding: 10px 10px;
+            padding: 12px 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 16px;
             color: #2c3e50;
             border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             user-select: none;
@@ -388,21 +376,23 @@
         }
         .add-new-donor-inline input {
             flex: 1;
-            padding: 6px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 16px;
+            min-height: 48px;
         }
         .add-new-donor-inline button {
-            padding: 6px 14px;
+            padding: 12px 16px;
             background-color: #9dae55;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
+            min-height: 48px;
         }
         .add-new-donor-inline button:hover {
             background-color: #7fa642;
@@ -412,7 +402,7 @@
               CATEGORY SELECTION SECTION
           ============================== */
         .category-section {
-            padding: 12px;
+            padding: 14px;
             border-bottom: 1px solid #e0e0e0;
             background-color: #7095bd;
             margin: 10px;
@@ -420,7 +410,7 @@
         }
         
         .category-section h2 {
-            font-size: 16px;
+            font-size: 18px;
             color: white;
             margin-bottom: 10px;
             font-weight: bold;
@@ -428,22 +418,23 @@
         
         .button-group {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .category-btn {
             flex: 1;
-            min-width: 70px;
-            padding: 6px 10px;
+            min-width: 120px;
+            padding: 12px 16px;
             border: 2px solid #9dae55;
             background-color: white;
             color: black;
-            border-radius: 4px;
-            font-size: 12px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
+            min-height: 48px;
         }
         
         .category-btn:hover {
@@ -555,7 +546,7 @@
         
         .temperature-input {
             display: none;
-            padding: 6px;
+            padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
@@ -573,17 +564,18 @@
         }
         
         .log-weight-btn {
-            padding: 6px 14px;
+            padding: 12px 16px;
             background-color: #9dae55;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
             height: var(--entry-height);
             align-self: center;
+            min-height: 48px;
         }
         
         .log-weight-btn:hover {
@@ -595,10 +587,10 @@
           ============================== */
         .buttons-section {
             background-color: #7095bd;
-            padding: 10px;
+            padding: 14px;
             display: flex;
             justify-content: space-around;
-            gap: 8px;
+            gap: 12px;
             flex-wrap: wrap;
             margin: 10px 10px 0 10px;
             border-radius: 6px;
@@ -606,11 +598,11 @@
         
         .btn {
             flex: 1 1 0;
-            min-width: 160px;
-            padding: 10px;
+            min-width: 200px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 4px;
-            font-size: 13px;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             color: white;
@@ -619,6 +611,7 @@
             word-break: normal;
             line-height: 1.2;
             text-align: center;
+            min-height: 48px;
         }
         
         .btn-submit {
@@ -703,15 +696,16 @@
         }
         
         .submit-donation-btn {
-            padding: 12px 30px;
+            padding: 14px 30px;
             background-color: #9dae55;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
+            min-height: 52px;
         }
         
         .submit-donation-btn:hover {
@@ -761,10 +755,98 @@
                     textarea {
                         font-size: 16px !important;
                     }
+
+                    /* Make the whole UI easier to tap on iPad/tablets (which may render “desktop” width). */
+                    body {
+                        font-size: 18px;
+                    }
+
+                    .navbar {
+                        padding: 0.5rem 1rem;
+                        height: auto;
+                        min-height: 64px;
+                    }
+
+                    .nav-links a {
+                        padding: 12px 20px;
+                        font-size: 1.12em;
+                    }
+
+                    .nav-toggle {
+                        padding: 10px 14px;
+                        font-size: 28px;
+                        border-radius: 10px;
+                    }
+
+                    .container {
+                        width: calc(100% - 16px);
+                        margin: 8px auto;
+                    }
+
+                    .form-section,
+                    .category-section,
+                    .usage-section,
+                    .output-section,
+                    .submit-section {
+                        padding: 14px;
+                    }
+
+                    .button-group {
+                        gap: 12px;
+                    }
+
+                    .buttons-section {
+                        padding: 14px;
+                        gap: 12px;
+                    }
+
+                    .input-field input,
+                    .input-field select,
+                    .donor-combo-input,
+                    .add-new-donor-inline input,
+                    .temperature-input {
+                        padding: 10px 12px;
+                        font-size: 18px;
+                        min-height: 48px;
+                    }
+
+                    .add-new-donor-inline button,
+                    .category-btn,
+                    .log-weight-btn,
+                    .btn,
+                    .submit-donation-btn {
+                        min-height: 48px;
+                        padding: 12px 16px;
+                        font-size: 16px;
+                        border-radius: 10px;
+                    }
+
+                    .category-btn {
+                        min-width: 120px;
+                    }
                 }
     </style>
 </head>
 <body>
+    <!-- =============================
+                     TOP NAVIGATION PANE
+         ============================== -->
+    <nav class="navbar">
+        <a class="nav-logo" href="index.html">
+            <img src="images/HCFP-Logo-Edited-removebg-preview.png" alt="Hancock County Food Pantry Logo" class="logo" style="max-height:60px;width:auto;vertical-align:middle;margin:0;">
+        </a>
+        <button class="nav-toggle" type="button" aria-controls="navLinks" aria-expanded="false" aria-label="Toggle navigation menu">
+            &#9776;
+        </button>
+        <div class="nav-links" id="navLinks">
+            <a href="index.html">Home</a>
+            <span class="nav-divider"></span>
+            <a href="donor-management.html">Donor Management</a>
+            <span class="nav-divider"></span>
+            <a href="donations-management.html">Donations Management</a>
+        </div>
+    </nav>
+
     <!-- =============================
                      BODY / APP CONTAINER
          ============================== -->
@@ -885,11 +967,11 @@
             <button class="submit-donation-btn">Submit Donation</button>
         </div>
     </div>
-</body>
-<!-- =============================
-                 SCRIPTS
-     ============================== -->
-<script>
+
+    <!-- =============================
+                     SCRIPTS
+         ============================== -->
+    <script>
     (function () {
         const navbar = document.querySelector('.navbar');
         if (!navbar) return;
@@ -917,6 +999,7 @@
             if (window.innerWidth > 420) setOpen(false);
         });
     })();
-</script>
-<script src="index.js"></script>
+    </script>
+    <script src="index.js"></script>
+</body>
 </html>
