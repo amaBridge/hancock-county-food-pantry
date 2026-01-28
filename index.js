@@ -266,9 +266,14 @@ function applyNewDonor() {
     // Check for duplicates (case-insensitive)
     if (donors.some(d => String(d).toLowerCase() === newDonor.toLowerCase())) {
         alert('That donor already exists in the list.');
-        companySelect.value = donors.find(d => String(d).toLowerCase() === newDonor.toLowerCase()) || '';
+        const existing = donors.find(d => String(d).toLowerCase() === newDonor.toLowerCase()) || '';
+        if (existing) {
+            if (typeof setSelectedDonorValue === 'function') setSelectedDonorValue(existing);
+            else companySelect.value = existing;
+        }
         newDonorInput.value = '';
-        handleCompanyChange();
+        if (typeof closeDonorCombobox === 'function') closeDonorCombobox();
+        if (typeof handleCompanyChange === 'function') handleCompanyChange();
         return;
     }
 
@@ -277,11 +282,13 @@ function applyNewDonor() {
 
     // Rebuild dropdown from storage (keeps ordering consistent with donor-management sort mode)
     updateCompanyDropdown();
-    companySelect.value = newDonor;
+    if (typeof setSelectedDonorValue === 'function') setSelectedDonorValue(newDonor);
+    else companySelect.value = newDonor;
 
     // Clear + hide the inline UI
     newDonorInput.value = '';
-    handleCompanyChange();
+    if (typeof closeDonorCombobox === 'function') closeDonorCombobox();
+    if (typeof handleCompanyChange === 'function') handleCompanyChange();
 }
 
 // =============================
