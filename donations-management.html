@@ -118,7 +118,7 @@
                     input,
                     select,
                     textarea {
-                        font-size: 16px;
+                        font-size: 16px !important;
                     }
 
           .table-section {
@@ -129,6 +129,15 @@
             min-width: 600px; /* Ensure the table has a minimum width */
           }
         }
+
+                /* Touch devices (incl. iPad): prevent focus-zoom even on wider viewports */
+                @media (hover: none) and (pointer: coarse) {
+                    input,
+                    select,
+                    textarea {
+                        font-size: 16px !important;
+                    }
+                }
     </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
