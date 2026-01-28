@@ -86,51 +86,13 @@
             outline-offset: 2px;
         }
 
-        /* Keep nav usable on medium-narrow screens (wrap, but stay horizontal) */
+        /* Mobile: hamburger menu */
         @media (max-width: 768px) {
             .navbar {
                 height: auto;
                 min-height: 60px;
                 padding: 0.5rem 0.75rem;
                 flex-wrap: wrap;
-            }
-
-            .nav-links {
-                position: static;
-                left: auto;
-                transform: none;
-                width: 100%;
-                justify-content: center;
-                flex-wrap: nowrap; /* keep buttons in one row */
-                padding: 0.25rem 0;
-                gap: 0;
-            }
-
-            .nav-links a {
-                flex: 1 1 0;
-                min-width: 0;
-                white-space: normal; /* allow label to wrap */
-                line-height: 1.15;
-                overflow-wrap: anywhere;
-                word-break: break-word;
-                hyphens: auto;
-                text-align: center;
-                padding: 6px 10px;
-                font-size: 1em;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .nav-divider {
-                margin: 0 0.25rem;
-                height: 18px;
-            }
-        }
-
-        /* Hamburger menu for very narrow screens */
-        @media (max-width: 420px) {
-            .navbar {
                 justify-content: space-between;
             }
 
@@ -147,6 +109,9 @@
                 gap: 0.25rem;
                 width: 100%;
                 padding: 0.5rem 0 0.25rem 0;
+                position: static;
+                left: auto;
+                transform: none;
             }
 
             .navbar.nav-open .nav-links {
@@ -997,7 +962,7 @@
         });
 
         window.addEventListener('resize', function () {
-            if (window.innerWidth > 420) setOpen(false);
+            if (window.innerWidth > 768) setOpen(false);
         });
     })();
     </script>
