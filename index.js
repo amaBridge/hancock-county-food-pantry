@@ -526,12 +526,16 @@ function normalizeDonorLabel(text) {
 function syncDonorComboboxFromSelect() {
     const input = document.getElementById('donorComboInput');
     const select = document.getElementById('companySelect');
+    const combo = document.getElementById('donorCombobox');
+    const clearBtn = document.getElementById('donorComboClear');
     if (!input || !select) return;
 
     const value = select.value;
     if (!value) {
         input.value = '';
         donorComboQuery = '';
+        if (combo) combo.classList.remove('has-value');
+        if (clearBtn) clearBtn.setAttribute('aria-hidden', 'true');
         return;
     }
 
@@ -540,12 +544,17 @@ function syncDonorComboboxFromSelect() {
     if (String(value).toLowerCase() === 'new') {
         input.value = '';
         donorComboQuery = '';
+        if (combo) combo.classList.remove('has-value');
+        if (clearBtn) clearBtn.setAttribute('aria-hidden', 'true');
         return;
     }
 
     const opt = [...select.options].find(o => o.value === value);
     input.value = normalizeDonorLabel(opt ? opt.textContent : value);
     donorComboQuery = '';
+
+    if (combo) combo.classList.add('has-value');
+    if (clearBtn) clearBtn.setAttribute('aria-hidden', 'false');
 }
 
 function getDonorComboboxOptionItems() {
@@ -660,9 +669,17 @@ function initDonorCombobox() {
     const list = document.getElementById('donorComboList');
     const select = document.getElementById('companySelect');
     const backdrop = document.getElementById('donorComboBackdrop');
+    const clearBtn = document.getElementById('donorComboClear');
     if (!combo || !input || !list || !select) return;
 
+    function updateClearState() {
+        const hasValue = Boolean(String(input.value || '').trim()) && String(select.value || '').toLowerCase() !== 'new';
+        combo.classList.toggle('has-value', hasValue);
+        if (clearBtn) clearBtn.setAttribute('aria-hidden', hasValue ? 'false' : 'true');
+    }
+
     syncDonorComboboxFromSelect();
+    updateClearState();
 
     input.addEventListener('focus', () => {
         openDonorCombobox();
@@ -674,7 +691,29 @@ function initDonorCombobox() {
         if (!donorComboOpen) donorComboOpen = true;
         donorComboActiveIndex = 0;
         renderDonorComboboxList();
+        updateClearState();
     });
+
+    if (clearBtn) {
+        const clear = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            armCategoryClickSuppression();
+
+            // Clear both UI and backing <select>.
+            select.value = '';
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+            donorComboQuery = '';
+            input.value = '';
+            updateClearState();
+
+            try { input.focus(); } catch { }
+            openDonorCombobox();
+        };
+        // pointerdown avoids blur-first behavior on touch.
+        clearBtn.addEventListener('pointerdown', clear);
+        clearBtn.addEventListener('click', clear);
+    }
 
     input.addEventListener('keydown', (e) => {
         const key = e.key;
@@ -750,6 +789,7 @@ function initDonorCombobox() {
     // When the hidden select changes (e.g., after adding a donor), sync input text
     select.addEventListener('change', () => {
         syncDonorComboboxFromSelect();
+        updateClearState();
     });
 }
 

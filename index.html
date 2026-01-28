@@ -299,15 +299,50 @@
         .donor-combobox {
             position: relative;
             width: 100%;
+            /* Keep the input + clear button above the click-absorbing backdrop */
+            z-index: 60;
         }
         .donor-combo-input {
             padding: 10px 12px;
+            padding-right: 44px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
             min-height: 48px;
             width: 100%;
             background: #fff;
+        }
+
+        .donor-combo-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+            background: rgba(90, 122, 146, 0.10);
+            color: #2c3e50;
+            font-size: 22px;
+            line-height: 1;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            z-index: 65;
+        }
+        .donor-combo-clear:hover {
+            background: rgba(90, 122, 146, 0.18);
+        }
+        .donor-combo-clear:focus {
+            outline: 2px solid #9dae55;
+            outline-offset: 2px;
+        }
+
+        .donor-combobox.has-value .donor-combo-clear {
+            display: inline-flex;
         }
         .donor-combo-list {
             display: none;
@@ -321,7 +356,7 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
             max-height: 260px;
             overflow: auto;
-            z-index: 50;
+            z-index: 70;
         }
 
         /* Backdrop to prevent taps/clicks landing on elements under the open dropdown */
@@ -902,6 +937,7 @@
                     <div class="company-row">
                         <div class="donor-combobox" id="donorCombobox">
                             <input type="text" id="donorComboInput" class="donor-combo-input" placeholder="Select or search donor..." autocomplete="off" spellcheck="false" aria-label="Select or search donor">
+                            <button type="button" id="donorComboClear" class="donor-combo-clear" aria-label="Clear donor" title="Clear">&times;</button>
                             <div id="donorComboList" class="donor-combo-list" role="listbox" aria-label="Donor options"></div>
                         </div>
 
