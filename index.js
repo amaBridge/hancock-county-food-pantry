@@ -37,19 +37,44 @@ function openReceiptPage(donation, { autoPrint = true } = {}) {
 
 function handleSubmitDonation() {
     const companySelect = document.getElementById('companySelect');
-    const companyName = companySelect ? companySelect.value : '';
+    let companyName = companySelect ? companySelect.value : '';
     if (!companyName) {
-        alert('Please select a company.');
+        alert('Please select a donor (company) before submitting.');
+        try { companySelect?.focus(); } catch { }
         return;
     }
+
+    // If user chose "Add New Donor...", require them to actually add/select a donor first.
+    if (String(companyName).toLowerCase() === 'new') {
+        const newDonorInput = document.getElementById('newDonorInput');
+        const typed = String(newDonorInput?.value || '').trim();
+        if (typed) {
+            // Try to add and select it, then continue.
+            applyNewDonor();
+            companyName = companySelect ? companySelect.value : '';
+        }
+
+        if (!companyName || String(companyName).toLowerCase() === 'new') {
+            alert('Please add a new donor name and tap Add before submitting.');
+            try { newDonorInput?.focus(); } catch { }
+            return;
+        }
+    }
     // Get totals
-    // Get temperature if Frozen Meats is present
+    // Temperature: required when Frozen Meats is part of this donation.
     let temperature = '';
     if ((categoryTotals['Frozen Meats'] || 0) > 0) {
         const tempInput = document.getElementById('temperatureInput');
-        if (tempInput && tempInput.value) {
-            temperature = tempInput.value;
+        if (tempInput) tempInput.classList.add('show');
+
+        const tempValue = String(tempInput?.value || '').trim();
+        if (!tempValue) {
+            alert('Please enter a temperature for Frozen Meats.');
+            try { tempInput?.focus(); } catch { }
+            return;
         }
+
+        temperature = tempValue;
     }
     const donation = {
         dateTime: new Date().toLocaleString(),
@@ -313,10 +338,31 @@ function restartDonation() {
 
 function logWeight() {
     // Records a single weight entry into the selected category total.
+    // Require a donor selection/add first (prevents weights being entered without a company).
+    const companySelect = document.getElementById('companySelect');
+    const companyName = companySelect ? companySelect.value : '';
+    if (!companyName || String(companyName).toLowerCase() === 'new') {
+        alert('Please select or add a donor (company) before logging weight.');
+        try { companySelect?.focus(); } catch { }
+        return;
+    }
+
     const category = selectedCategory;
     if (!category || !(category in categoryTotals)) {
         alert('Please select a category.');
         return;
+    }
+
+    // If Frozen Meats is selected, require a temperature before logging.
+    if (category === 'Frozen Meats') {
+        const tempInput = document.getElementById('temperatureInput');
+        if (tempInput) tempInput.classList.add('show');
+        const tempValue = String(tempInput?.value || '').trim();
+        if (!tempValue) {
+            alert('Please enter a temperature for Frozen Meats.');
+            try { tempInput?.focus(); } catch { }
+            return;
+        }
     }
     // Get weight value
     const usageValueElem = document.querySelector('.usage-value');
