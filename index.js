@@ -1238,6 +1238,33 @@ document.addEventListener('DOMContentLoaded', function() {
     if (logBtn) {
         logBtn.addEventListener('click', logWeight);
     }
+
+    // Weight input: clear the default zero on focus so users can type immediately.
+    const usageValueElem = document.querySelector('.usage-value');
+    if (usageValueElem && usageValueElem.tagName === 'INPUT') {
+        const weightInput = usageValueElem;
+
+        const isZeroPlaceholder = (value) => {
+            const v = String(value ?? '').trim();
+            if (!v) return false;
+            // Treat any 0 / 0.0 / 0.00 / 00.000 as placeholder.
+            return /^0+(?:\.0+)?$/.test(v);
+        };
+
+        weightInput.addEventListener('focus', () => {
+            if (isZeroPlaceholder(weightInput.value)) {
+                weightInput.value = '';
+            } else {
+                // Convenience: highlight existing value for quick overwrite.
+                try { weightInput.select(); } catch { }
+            }
+        });
+
+        weightInput.addEventListener('blur', () => {
+            const v = String(weightInput.value ?? '').trim();
+            if (!v) weightInput.value = '0.00';
+        });
+    }
     // Action buttons
     const undoBtn = document.querySelector('.btn-submit');
     if (undoBtn) undoBtn.addEventListener('click', undoLastMeasurement);
