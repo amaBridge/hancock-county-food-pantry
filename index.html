@@ -490,6 +490,7 @@
               CATEGORY SELECTION SECTION
           ============================== */
         .category-section {
+            --entry-height: 84px;
             padding: 14px;
             border-bottom: 1px solid #e0e0e0;
             background-color: #7095bd;
@@ -522,7 +523,7 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 48px;
+            min-height: var(--entry-height);
         }
         
         .category-btn:hover {
@@ -938,6 +939,14 @@
                         padding: 12px 16px;
                         font-size: 16px;
                         border-radius: 10px;
+                    }
+
+                    .category-btn {
+                        min-height: var(--entry-height);
+                    }
+
+                    .buttons-section .btn {
+                        min-height: var(--entry-height);
                     }
 
                     .category-btn {
