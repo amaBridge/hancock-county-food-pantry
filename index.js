@@ -500,6 +500,7 @@ let donorComboQuery = '';
 // Touch/scroll helpers (iOS Safari can emit a click after a scroll gesture)
 let donorComboLastTouchMoveAt = 0;
 let donorComboSuppressClickUntil = 0;
+let donorComboHasTouchEvents = false;
 function donorComboTouchWasMovingRecently(windowMs = 220) {
     return Date.now() - donorComboLastTouchMoveAt < windowMs;
 }
@@ -858,6 +859,7 @@ function renderDonorComboboxList() {
         let touchStartY = 0;
         let touchMoved = false;
         row.addEventListener('touchstart', (e) => {
+            donorComboHasTouchEvents = true;
             const t = e.touches && e.touches[0];
             if (!t) return;
             touchStartX = t.clientX;
@@ -879,6 +881,47 @@ function renderDonorComboboxList() {
         row.addEventListener('touchend', (e) => {
             if (touchMoved) return;
             // Select immediately on a tap, but suppress the synthetic click iOS may fire after.
+            selectThisRow(e, { bypassSuppression: true });
+            donorComboSuppressClickUntil = Date.now() + 650;
+        }, { passive: false });
+
+        // iPad "Request Desktop Website" often relies on Pointer Events instead of Touch Events.
+        // Add pointer-based tap selection while preserving scroll.
+        let ptrId = null;
+        let ptrStartX = 0;
+        let ptrStartY = 0;
+        let ptrMoved = false;
+
+        row.addEventListener('pointerdown', (e) => {
+            // If the browser is already giving us touch events, avoid double-handling.
+            if (donorComboHasTouchEvents) return;
+            if (e.pointerType === 'mouse') return;
+            ptrId = e.pointerId;
+            ptrStartX = e.clientX;
+            ptrStartY = e.clientY;
+            ptrMoved = false;
+        }, { passive: true });
+
+        row.addEventListener('pointermove', (e) => {
+            if (donorComboHasTouchEvents) return;
+            if (e.pointerType === 'mouse') return;
+            if (ptrId === null || e.pointerId !== ptrId) return;
+            const dx = Math.abs(e.clientX - ptrStartX);
+            const dy = Math.abs(e.clientY - ptrStartY);
+            if (dx > 8 || dy > 8) {
+                ptrMoved = true;
+                donorComboLastTouchMoveAt = Date.now();
+            }
+        }, { passive: true });
+
+        row.addEventListener('pointerup', (e) => {
+            if (donorComboHasTouchEvents) return;
+            if (e.pointerType === 'mouse') return;
+            if (ptrId === null || e.pointerId !== ptrId) return;
+            ptrId = null;
+            if (ptrMoved) return;
+
+            // Treat as a tap.
             selectThisRow(e, { bypassSuppression: true });
             donorComboSuppressClickUntil = Date.now() + 650;
         }, { passive: false });
@@ -931,6 +974,7 @@ function initDonorCombobox() {
     // If the user taps the combobox container (padding/empty area), still focus the input
     // so the keyboard appears on the first tap.
     combo.addEventListener('pointerdown', openAndFocusFromGesture);
+    combo.addEventListener('pointerup', openAndFocusFromGesture);
     // iOS Safari: focus must often occur on touchend to open the keyboard.
     combo.addEventListener('touchend', openAndFocusFromGesture, { passive: true });
     combo.addEventListener('click', openAndFocusFromGesture);
@@ -941,7 +985,14 @@ function initDonorCombobox() {
     }, { passive: true });
 
     list.addEventListener('touchmove', () => {
+        donorComboHasTouchEvents = true;
         donorComboLastTouchMoveAt = Date.now();
+    }, { passive: true });
+
+    list.addEventListener('pointermove', (e) => {
+        if (e && e.pointerType && e.pointerType !== 'mouse') {
+            donorComboLastTouchMoveAt = Date.now();
+        }
     }, { passive: true });
 
     function updateClearState() {
