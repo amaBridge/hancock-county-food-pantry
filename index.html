@@ -813,6 +813,18 @@
             display: none;
           }
 
+                                        /* Slightly shorter primary buttons on mobile, while keeping them consistent. */
+                                        .category-section,
+                                        .usage-section,
+                                        .buttons-section {
+                                                --entry-height: 72px;
+                                        }
+
+                                        .submit-donation-btn {
+                                                min-height: 72px;
+                                                height: 72px;
+                                        }
+
                                         /* Keep action buttons from wrapping too early by tightening spacing first. */
                                         .buttons-section {
                                                 padding: 12px;
