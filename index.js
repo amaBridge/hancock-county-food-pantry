@@ -521,14 +521,16 @@ function adjustDonorComboboxDropdownPlacement() {
     const spaceBelow = Math.max(0, viewportHeight - inputRect.bottom - padding);
     const spaceAbove = Math.max(0, inputRect.top - padding);
 
-    const desiredMax = 260;
+    // Bigger dropdown: use a % of the *visible* viewport (shrinks automatically when keyboard shows).
+    // Cap it so it never becomes absurdly large on desktop.
+    const desiredMax = Math.min(560, Math.max(260, Math.floor(viewportHeight * 0.55)));
     const minUsable = 140;
     const shouldDropUp = spaceBelow < minUsable && spaceAbove > spaceBelow;
 
     list.classList.toggle('drop-up', shouldDropUp);
 
     const available = shouldDropUp ? spaceAbove : spaceBelow;
-    const maxHeight = Math.max(120, Math.min(desiredMax, Math.floor(available)));
+    const maxHeight = Math.max(140, Math.min(desiredMax, Math.floor(available)));
     list.style.maxHeight = `${maxHeight}px`;
 }
 
