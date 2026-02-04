@@ -1,11 +1,16 @@
 const express = require('express');
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const fs = require('fs');
 const path = require('path');
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+
+// Serve the static HTML app from the project root.
+// This allows opening http://localhost:3000/index.html (and related pages)
+// while keeping the JSON API routes below.
+app.use(express.static(__dirname));
 
 // Path to the JSON file
 const dataFilePath = path.join(__dirname, 'data.json');
@@ -21,9 +26,14 @@ function writeData(newData) {
     fs.writeFileSync(dataFilePath, JSON.stringify(newData, null, 2), 'utf8');
 }
 
-// Test route
+// Default route: load the Home page.
 app.get('/', (req, res) => {
-  res.send('Express server is running!');
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Health check route
+app.get('/health', (req, res) => {
+    res.type('text/plain').send('OK');
 });
 
 // Route to get all donations
